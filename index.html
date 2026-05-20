@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GestãoGuias</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d1117;--bg2:#161b27;--bg3:#1d2336;--bg4:#252d40;
+  --bd:#252d42;--bd2:#3a4a6a;
+  --tx:#dde3f0;--tx2:#8a97b8;--tx3:#4a5570;
+  --blue:#4e8df5;--bluebg:#0f1e3d;--blue2:#3370d4;
+  --green:#3ecf8e;--greenbg:#0a2318;--green2:#2aaa70;
+  --red:#f75a5a;--redbg:#2b0f0f;--red2:#c44040;
+  --amber:#f5b942;--amberbg:#2b1d08;
+  --purple:#a78bfa;--purplebg:#1c1040;
+  --r:8px;--r2:12px;
+  font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;
+}
+body{background:var(--bg);color:var(--tx);min-height:100vh}
+.bar{background:var(--bg2);border-bottom:1px solid var(--bd);padding:0 20px;display:flex;align-items:center;gap:12px;height:52px;position:sticky;top:0;z-index:100}
+.logo{font-size:15px;font-weight:700;color:var(--blue);display:flex;align-items:center;gap:7px}
+.logo i{font-size:18px}
+.tabs{display:flex;gap:2px;margin-left:auto}
+.tab{padding:5px 14px;border-radius:6px;border:none;background:transparent;color:var(--tx2);cursor:pointer;font-size:13px;font-weight:500;display:flex;align-items:center;gap:5px;transition:.12s}
+.tab:hover{background:var(--bg3);color:var(--tx)}
+.tab.on{background:var(--bluebg);color:var(--blue)}
+.tab i{font-size:14px}
+.page{display:none;padding:20px;max-width:1400px;margin:0 auto}
+.page.on{display:block}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:20px}
+.scard{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r2);padding:14px 16px}
+.lbl{font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px}
+.val{font-size:20px;font-weight:700}
+.val.blue{color:var(--blue)}.val.green{color:var(--green)}.val.red{color:var(--red)}.val.amber{color:var(--amber)}
+.fbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.sw{position:relative;flex:1;min-width:180px}
+.sw i{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--tx3);font-size:15px;pointer-events:none}
+input[type=text],input[type=date],select,textarea{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);color:var(--tx);padding:7px 10px;font-size:13px;outline:none;transition:.12s}
+input:focus,select:focus,textarea:focus{border-color:var(--blue)}
+.sw input{padding-left:32px;width:100%}
+select option{background:var(--bg3)}
+.tw{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r2);overflow:hidden}
+table{width:100%;border-collapse:collapse;table-layout:fixed}
+th{background:var(--bg3);color:var(--tx2);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;padding:9px 12px;text-align:left;border-bottom:1px solid var(--bd)}
+td{padding:9px 12px;border-bottom:1px solid var(--bd);vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--bg3)}
+.bg{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:600}
+.bg.gr{background:var(--greenbg);color:var(--green)}.bg.re{background:var(--redbg);color:var(--red)}
+.bg.am{background:var(--amberbg);color:var(--amber)}.bg.bl{background:var(--bluebg);color:var(--blue)}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx);cursor:pointer;font-size:13px;font-weight:500;transition:.12s;white-space:nowrap}
+.btn:hover{background:var(--bg4);border-color:var(--blue)}
+.btn.pri{background:var(--blue);border-color:var(--blue2);color:#fff}.btn.pri:hover{background:var(--blue2)}
+.btn.dan{background:var(--redbg);border-color:var(--red2);color:var(--red)}.btn.dan:hover{background:#3a1212}
+.btn.suc{background:var(--greenbg);border-color:var(--green2);color:var(--green)}.btn.suc:hover{background:#0d2d1a}
+.btn.sm{padding:4px 9px;font-size:12px}.btn i{font-size:14px}
+.acol{display:flex;gap:5px;justify-content:flex-end}
+.ph{display:flex;align-items:center;gap:14px;margin-bottom:20px;flex-wrap:wrap}
+.pt{font-size:19px;font-weight:600}.sp{flex:1}
+.undo{background:var(--bg3);border:1px solid var(--amberbg);border-radius:var(--r);padding:9px 14px;display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.undo i{color:var(--amber)}
+.mover{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal{background:var(--bg2);border:1px solid var(--bd2);border-radius:var(--r2);width:min(680px,100%);max-height:90vh;overflow-y:auto}
+.mhd{padding:18px 22px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:10px;position:sticky;top:0;background:var(--bg2);z-index:1}
+.mtt{font-size:15px;font-weight:600;flex:1}
+.mbody{padding:22px}.mft{padding:14px 22px;border-top:1px solid var(--bd);display:flex;gap:9px;justify-content:flex-end}
+.fg{margin-bottom:14px}.fl{font-size:12px;color:var(--tx2);margin-bottom:5px;display:block;font-weight:500}
+.fg input,.fg select,.fg textarea{width:100%}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+textarea{resize:vertical;min-height:80px;line-height:1.5}
+.plist{display:flex;flex-direction:column;gap:7px;margin-top:7px}
+.pi{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);padding:9px 11px;display:flex;align-items:center;gap:7px}
+.pi .rm{margin-left:auto;background:none;border:none;color:var(--red);cursor:pointer;padding:2px 4px;border-radius:4px}
+.pi .rm:hover{background:var(--redbg)}.pidet{flex:1;font-size:12px;color:var(--tx2)}.picod{font-weight:600;color:var(--tx);font-size:13px}
+.apr{display:grid;grid-template-columns:110px 1fr 70px auto;gap:7px;align-items:end;margin-bottom:7px}
+.uz{border:2px dashed var(--bd2);border-radius:var(--r2);padding:40px;text-align:center;cursor:pointer;transition:.2s;background:var(--bg2)}
+.uz:hover,.uz.over{border-color:var(--blue);background:var(--bluebg)}
+.uz i{font-size:36px;color:var(--blue);margin-bottom:10px;display:block}.uz p{color:var(--tx2);margin-bottom:6px}.uz small{color:var(--tx3);font-size:12px}
+.ctw{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r2);overflow:auto}
+.ctw table td,.ctw table th{white-space:nowrap}
+.mok td:first-child{border-left:3px solid var(--green)}.mno td:first-child{border-left:3px solid transparent}
+.chk{width:16px;height:16px;accent-color:var(--blue);cursor:pointer}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--bg3);border:1px solid var(--bd2);border-radius:var(--r);padding:10px 16px;display:flex;align-items:center;gap:9px;z-index:9999;font-size:13px;box-shadow:0 6px 20px rgba(0,0,0,.5);animation:tin .18s ease}
+@keyframes tin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.toast.ok{border-color:var(--green2);color:var(--green)}.toast.er{border-color:var(--red2);color:var(--red)}.toast.in{border-color:var(--blue2);color:var(--blue)}
+.hi{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);padding:10px 13px;margin-bottom:7px;display:flex;align-items:center;gap:11px}
+.hid{flex:1;font-size:13px}.hit{font-size:11px;color:var(--tx3)}
+.empty{text-align:center;padding:44px;color:var(--tx3)}.empty i{font-size:32px;margin-bottom:10px;display:block}
+.det-item{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);padding:8px 12px;margin-bottom:6px}
+.det-item .dc{font-size:12px;color:var(--tx2)}.det-item .dn{font-size:13px;font-weight:500}
+.prog-box{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r2);padding:24px;text-align:center;margin-top:14px}
+.spin{animation:sp .9s linear infinite;display:inline-block;font-size:28px;color:var(--blue);margin-bottom:10px}
+@keyframes sp{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="logo"><i class="ti ti-stethoscope"></i>GestãoGuias</div>
+  <div class="tabs">
+    <button class="tab on" onclick="nav('guias',this)"><i class="ti ti-file-text"></i>Guias</button>
+    <button class="tab" onclick="nav('conf',this)"><i class="ti ti-checklist"></i>Conferir Pgto</button>
+    <button class="tab" onclick="nav('pagas',this)"><i class="ti ti-circle-check"></i>Pagas</button>
+    <button class="tab" onclick="nav('hist',this)"><i class="ti ti-history"></i>Histórico</button>
+  </div>
+</div>
+
+<div id="page-guias" class="page on">
+  <div class="ph">
+    <div class="pt">Guias</div><div class="sp"></div>
+    <button class="btn" onclick="openUpload()"><i class="ti ti-upload"></i>Importar PDF</button>
+    <button class="btn" onclick="document.getElementById('jin').click()"><i class="ti ti-database-import"></i>JSON</button>
+    <input type="file" id="jin" accept=".json" style="display:none" onchange="importJSON(this)">
+    <button class="btn" onclick="exportJSON()"><i class="ti ti-download"></i>Exportar JSON</button>
+    <button class="btn" onclick="exportRelatorio()"><i class="ti ti-file-type-pdf"></i>Relatório PDF</button>
+    <button class="btn dan" onclick="if(confirm('Limpar TODAS as guias? Isso não pode ser desfeito.')){db.guias=[];save();renderG();stG();toast('Todas as guias removidas','er')}"><i class="ti ti-trash"></i>Limpar Tudo</button>
+    <button class="btn pri" onclick="openNew()"><i class="ti ti-plus"></i>Nova Guia</button>
+  </div>
+  <div class="stats" id="st-guias"></div>
+  <div id="selbar" style="display:none" class="undo">
+    <i class="ti ti-checkbox"></i><span id="selmsg"></span><div class="sp"></div>
+    <button class="btn sm dan" onclick="delSel()"><i class="ti ti-trash"></i>Excluir Selecionadas</button>
+    <button class="btn sm" onclick="clearSelG()"><i class="ti ti-x"></i>Cancelar</button>
+  </div>
+  <div id="ubar" style="display:none" class="undo">
+    <i class="ti ti-alert-triangle"></i><span id="umsg"></span><div class="sp"></div>
+    <button class="btn sm" onclick="undoDel()"><i class="ti ti-arrow-back-up"></i>Desfazer</button>
+    <button class="btn sm dan" onclick="document.getElementById('ubar').style.display='none'"><i class="ti ti-x"></i></button>
+  </div>
+  <div class="fbar">
+    <div class="sw"><i class="ti ti-search"></i><input type="text" id="sq" placeholder="Buscar nome, nº guia..." oninput="renderG()"></div>
+    <select id="fsit" onchange="renderG()"><option value="">Todas situações</option><option>Guia em edição</option><option>Guia anexada à remessa</option><option>Guia Cancelada</option><option>Guia Devolvida</option></select>
+    <select id="frem" onchange="renderG()"><option value="">Todas remessas</option></select>
+  </div>
+  <div class="tw"><table>
+    <thead><tr>
+      <th style="width:34px"><input type="checkbox" class="chk" id="chkallg" onchange="togAllG(this)"></th>
+      <th style="width:120px">Nº Guia</th><th>Beneficiário</th>
+      <th style="width:90px">Remessa</th><th style="width:100px">Emissão</th>
+      <th style="width:120px">Situação</th><th style="width:85px">Valor (R$)</th>
+      <th style="width:110px">Ações</th>
+    </tr></thead>
+    <tbody id="tbg"></tbody>
+  </table></div>
+  <div id="eg" class="empty" style="display:none"><i class="ti ti-file-off"></i>Nenhuma guia</div>
+</div>
+
+<div id="page-conf" class="page">
+  <div class="ph"><div class="pt">Conferir Pagamento</div></div>
+  <p style="color:var(--tx2);margin-bottom:14px;font-size:13px;line-height:1.6">Cole os dados da operadora (TSV copiado). Cruza por <b style="color:var(--tx)">Nº Guia</b>, <b style="color:var(--tx)">Remessa</b> e <b style="color:var(--tx)">Nome</b>.</p>
+  <div class="fg"><label class="fl">Dados de pagamento</label>
+    <textarea id="cpaste" style="width:100%;min-height:130px;font-family:monospace;font-size:11px" placeholder="Tipo	Nº Guia do Prestador	Nº Carteira	Beneficiário	Autorização	Data de Emissão	Remessa	Lote	Doc	Situação da Guia	Situação do Processamento"></textarea>
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:20px">
+    <button class="btn pri" onclick="conferir()"><i class="ti ti-search"></i>Conferir</button>
+    <button class="btn" onclick="limparConf()"><i class="ti ti-eraser"></i>Limpar</button>
+  </div>
+  <div id="cres" style="display:none">
+    <div class="stats" id="st-conf" style="margin-bottom:14px"></div>
+    <div id="cundo" style="display:none" class="undo">
+      <i class="ti ti-alert-triangle"></i><span id="cundomsg"></span><div class="sp"></div>
+      <button class="btn sm" onclick="undoConf()"><i class="ti ti-arrow-back-up"></i>Desfazer</button>
+    </div>
+    <div class="fbar">
+      <button class="btn suc" onclick="confirmarSel()"><i class="ti ti-check"></i>Confirmar Selecionadas como Pagas</button>
+      <span style="color:var(--tx3);font-size:12px" id="selct"></span>
+    </div>
+    <div class="ctw"><table>
+      <thead><tr>
+        <th style="width:34px"><input type="checkbox" class="chk" id="chkall" onchange="togAll(this)"></th>
+        <th style="width:120px">Nº Guia</th><th>Beneficiário (arquivo)</th>
+        <th style="width:90px">Remessa</th><th style="width:130px">Sit. Processamento</th>
+        <th style="width:100px">Match BD</th><th style="width:85px">Valor (R$)</th>
+      </tr></thead>
+      <tbody id="ctbody"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<div id="page-pagas" class="page">
+  <div class="ph"><div class="pt">Guias Pagas</div><div class="sp"></div>
+    <button class="btn sm dan" onclick="if(confirm('Limpar lista de pagas?')){db.pagas=[];save();renderP()}"><i class="ti ti-trash"></i>Limpar</button>
+  </div>
+  <div class="stats" id="st-pagas"></div>
+  <div class="fbar"><div class="sw"><i class="ti ti-search"></i><input type="text" id="sqp" placeholder="Buscar..." oninput="renderP()"></div></div>
+  <div class="tw"><table>
+    <thead><tr>
+      <th style="width:120px">Nº Guia</th><th>Beneficiário</th>
+      <th style="width:90px">Remessa</th><th style="width:100px">Data Pgto</th>
+      <th style="width:85px">Valor (R$)</th><th style="width:90px">Ações</th>
+    </tr></thead>
+    <tbody id="tbp"></tbody>
+  </table></div>
+  <div id="ep" class="empty" style="display:none"><i class="ti ti-circle-check"></i>Nenhuma guia paga ainda</div>
+</div>
+
+<div id="page-hist" class="page">
+  <div class="ph"><div class="pt">Histórico</div><div class="sp"></div>
+    <button class="btn sm dan" onclick="if(confirm('Limpar?')){db.hist=[];save();renderH()}"><i class="ti ti-trash"></i>Limpar</button>
+  </div>
+  <div id="hlist"></div>
+  <div id="eh" class="empty" style="display:none"><i class="ti ti-history"></i>Nenhuma ação registrada</div>
+</div>
+
+<!-- MODAL GUIA -->
+<div id="mg" class="mover" style="display:none" onclick="if(event.target===this)closeM('mg')">
+<div class="modal">
+  <div class="mhd"><i class="ti ti-file-text" style="color:var(--blue);font-size:18px"></i><div class="mtt" id="mgt">Nova Guia</div><button class="btn sm" onclick="closeM('mg')"><i class="ti ti-x"></i></button></div>
+  <div class="mbody">
+    <input type="hidden" id="eid">
+    <div class="fr"><div class="fg"><label class="fl">Nº Guia *</label><input type="text" id="fn"></div><div class="fg"><label class="fl">Remessa</label><input type="text" id="fr2"></div></div>
+    <div class="fg"><label class="fl">Beneficiário *</label><input type="text" id="fb"></div>
+    <div class="fr"><div class="fg"><label class="fl">Data de Emissão</label><input type="date" id="fd"></div><div class="fg"><label class="fl">Lote</label><input type="text" id="fl2"></div></div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Situação</label><select id="fsi"><option>Guia em edição</option><option>Guia anexada à remessa</option><option>Guia Cancelada</option><option>Guia Devolvida</option></select></div>
+      <div class="fg"><label class="fl">Valor (R$)</label><input type="text" id="fv" placeholder="0.00"></div>
+    </div>
+    <div class="fr"><div class="fg"><label class="fl">SIASS</label><input type="text" id="fss"></div><div class="fg"><label class="fl">Sexo</label><select id="fsx"><option value="">—</option><option>FEMININO</option><option>MASCULINO</option></select></div></div>
+    <div class="fg">
+      <label class="fl">Procedimento</label>
+      <div class="apr"><input type="text" id="pc" placeholder="Código"><input type="text" id="pd" placeholder="Descrição"><input type="text" id="pq" value="1"><button class="btn sm pri" onclick="addP()"><i class="ti ti-plus"></i></button></div>
+      <div class="plist" id="plist"></div>
+    </div>
+  </div>
+  <div class="mft"><button class="btn" onclick="closeM('mg')">Cancelar</button><button class="btn pri" onclick="saveG()"><i class="ti ti-check"></i>Salvar</button></div>
+</div>
+</div>
+
+<!-- MODAL UPLOAD -->
+<div id="mu" class="mover" style="display:none" onclick="if(event.target===this)closeM('mu')">
+<div class="modal">
+  <div class="mhd"><i class="ti ti-file-type-pdf" style="color:var(--blue);font-size:18px"></i><div class="mtt">Importar PDF Mini-tickets</div><button class="btn sm" onclick="closeM('mu')"><i class="ti ti-x"></i></button></div>
+  <div class="mbody">
+    <div class="uz" id="udrop" onclick="document.getElementById('pfi').click()">
+      <i class="ti ti-file-type-pdf"></i>
+      <p>Clique ou arraste o PDF aqui</p>
+      <small>Extrai todas as guias, valores e procedimentos automaticamente</small>
+    </div>
+    <input type="file" id="pfi" accept=".pdf" style="display:none" onchange="handlePDF(this)">
+    <div id="pprev"></div>
+  </div>
+  <div class="mft"><button class="btn" onclick="closeM('mu')">Cancelar</button><button class="btn pri" id="bimport" style="display:none" onclick="importPDF()"><i class="ti ti-check"></i>Importar Guias</button></div>
+</div>
+</div>
+
+<!-- MODAL PROCS -->
+<div id="mdet" class="mover" style="display:none" onclick="if(event.target===this)closeM('mdet')">
+<div class="modal">
+  <div class="mhd"><i class="ti ti-list" style="color:var(--blue);font-size:18px"></i><div class="mtt" id="mdet-title">Procedimentos</div><button class="btn sm" onclick="closeM('mdet')"><i class="ti ti-x"></i></button></div>
+  <div class="mbody"><div id="mdet-body"></div></div>
+</div>
+</div>
+
+<script>
+/* ============================================================
+   pdf.js worker
+============================================================ */
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+
+/* ============================================================
+   PARSER
+   
+   Uses RAW item coordinates — the KEY insight from debug:
+   
+   Each guia has a "row" in the HTML table. In that row:
+   - The guia number (10 digits) sits at x ≈ 82
+   - The valor (float like 323.83) sits at x ≈ 436
+   - BOTH have the SAME Y coordinate (within ~3px)
+   
+   So we group all items by Y, find rows where a 10-digit num
+   and a float coexist, and extract valor that way.
+   
+   The text block (detail column at x ≈ 298) is parsed separately
+   for metadata and procedures — it's clean and sequential.
+============================================================ */
+
+function parsePDFItems(allPageItems) {
+  const EMOJI = new Set([...'👤👩👨🧑👦👧👴👵🧒🧔🧕']);
+  const NAME_SKIP = new Set([
+    'Guia','guia','anexada','à','remessa','edição','Nº','da','RG',
+    'RESPONSÁVEL','ÃO','Situação','Detalhes','Valor','Ações','Remessa',
+    'Identidade','Beneficiário','Aplicar','processamento','Status',
+    'após','(R$)','Editar','Excluir'
+  ]);
+
+  // ── STEP 1: Group all items by page and Y coordinate ──
+  // Returns array of pages, each page = array of {y, items:[{x,s,w}]}
+  function buildPageLines(items) {
+    const byY = new Map();
+    for (const it of items) {
+      const y = Math.round(it.transform[5]);
+      if (!byY.has(y)) byY.set(y, []);
+      byY.get(y).push({ x: Math.round(it.transform[4]), s: it.str, w: it.width||0 });
+    }
+    // Sort Y descending (top of page first in PDF coords)
+    return [...byY.entries()]
+      .sort((a,b) => b[0]-a[0])
+      .map(([y, items]) => ({ y, items: items.sort((a,b)=>a.x-b.x) }));
+  }
+
+  const pages = allPageItems.map(buildPageLines);
+
+  // ── STEP 2: Find emoji lines ──
+  const emojiLines = [];
+  for (let pi = 0; pi < pages.length; pi++) {
+    for (let li = 0; li < pages[pi].length; li++) {
+      const line = pages[pi][li];
+      if (line.items.some(it => [...it.s].some(c => EMOJI.has(c)))) {
+        emojiLines.push({ pi, li });
+      }
+    }
+  }
+
+  // ── STEP 3: Extract row data for each emoji ──
+  // From debug: num@x82, name@x133, remessa@x194, valor@x436
+  // These are FIXED coordinates in this PDF format
+  // Use tolerances: num x 70-100, name x 120-165, remessa x 180-220, valor x 400+
+
+  function extractRow(pi, li) {
+    let num = null, valor = null, remessa = null;
+    const nameParts = [];
+
+    for (let dl = -3; dl <= 8; dl++) {
+      const idx = li + dl;
+      if (idx < 0 || idx >= pages[pi].length) continue;
+      const line = pages[pi][idx];
+
+      for (const it of line.items) {
+        const s = it.s.trim();
+        if (!s) continue;
+
+        // Num: 10-digit at x≈82 (range 70-110)
+        if (it.x >= 70 && it.x <= 110 && /^\d{10}$/.test(s) && !num) {
+          num = s;
+        }
+        // Valor: float at x≈436 (range 400-500)
+        else if (it.x >= 400 && it.x <= 500 && /^\d{1,5}[.,]\d{2}$/.test(s) && !valor) {
+          const v = parseFloat(s.replace(',', '.'));
+          if (v > 0 && v < 50000) valor = v.toFixed(2);
+        }
+        // Remessa Model A: 7-digit at x≈194 (range 180-230) — remessa column
+        else if (it.x >= 180 && it.x <= 230 && /^\d{7}$/.test(s) && !remessa) {
+          remessa = s;
+        }
+        // Name: text at x≈133 (range 120-175)
+        else if (it.x >= 120 && it.x <= 175) {
+          const w = s;
+          if (w.length > 1 && !NAME_SKIP.has(w) && !/^\d/.test(w) &&
+              /^[A-ZÁÉÍÓÚÀÈÌÒÙÃÕÂÊÎÔÛÇa-záéíóúàèìòùãõâêîôûç]/.test(w)) {
+            nameParts.push({ y: line.y, s: w });
+          }
+        }
+      }
+    }
+
+    // Sort name top→bottom, deduplicate
+    nameParts.sort((a,b) => b.y - a.y);
+    const seen = new Set();
+    const benef = nameParts
+      .map(p => p.s)
+      .filter(w => { if (seen.has(w)) return false; seen.add(w); return true; })
+      .join(' ');
+
+    return { num, benef, remessa, valor };
+  }
+
+  const rows = emojiLines
+    .map(({pi, li}) => extractRow(pi, li))
+    .filter(r => r.num);
+
+  // ── STEP 4: Build full detail text (all pages concatenated) ──
+  // Only items at x >= 290 (detail column) sorted top→bottom per page
+  let fullText = '';
+  for (const lines of pages) {
+    for (const line of lines) {
+      // Detail column: x >= 290
+      const detailItems = line.items.filter(it => it.x >= 290);
+      if (!detailItems.length) continue;
+      let lineStr = '', lastX = null;
+      for (const it of detailItems) {
+        if (lastX !== null && it.x - lastX > 8) lineStr += ' ';
+        lineStr += it.s;
+        lastX = it.x + it.w;
+      }
+      if (lineStr.trim()) fullText += lineStr + '\n';
+    }
+    fullText += '\n';
+  }
+
+  // Clean noise
+  fullText = fullText.replace(/\d{2}\/\d{2}\/\d{4},\s*\d{2}:\d{2}\s*Mini-tickets/g, '');
+  fullText = fullText.replace(/about:blank[^\n]*/g, '');
+  fullText = fullText.replace(/\bEditar\b|\bExcluir\b/g, '');
+  fullText = fullText.replace(/^\d{1,2}\/\d{1,2}\s*$/mg, '');
+  // Remove header lines that contain known header keywords only
+  fullText = fullText.replace(/^(?:Remessa|Identidade(?:\s+Guia)?|Benefici\u00e1rio|Situa\u00e7\u00e3o|Detalhes|da Guia|Valor|\(R\$\)|Status|ap\u00f3s|A\u00e7\u00f5es|processamento\)|N\u00ba|Aplicar)\s*$/mg, '');
+  fullText = fullText.replace(/\n{3,}/g, '\n\n');
+
+  // Split by "Nº Guia do Prestador:" into per-guia blocks
+  const blockMap = {};
+  for (const blk of fullText.split(/N[º°]\s*Guia do Prestador:\s*/)) {
+    const nm = blk.match(/^\s*(\d{10})\b/);
+    if (nm) blockMap[nm[1]] = blk;
+  }
+
+  // ── STEP 5: Parse detail block for each row ──
+  const DATE = String.raw`(?:\d+\s+)*(\d{2}\/\d{2}\/\d{4})`;
+
+  const guias = [];
+  for (const row of rows) {
+    const block = blockMap[row.num] || '';
+    const flat  = block.replace(/\s+/g, ' ');
+
+    const mDem  = flat.match(new RegExp('Data Emiss\u00e3o:\\s*' + DATE));
+    const mSias = flat.match(/Guia SIASS:\s*([\w.]+)/);
+    const mLote = flat.match(/Lote:\s*(\d+)/);
+    const mSexo = flat.match(/Sexo:\s*(FEMININO|MASCULINO)/);
+    const mNasc = flat.match(new RegExp('Data Nasc\\.\\:\\s*' + DATE));
+
+    // Remessa Model B: in detail block as "remessa XXXXXXX" or from Lote
+    // Model A already has remessa from x≈194 column
+    // Model B: look for 7-digit number after "remessa" keyword in block
+    let remessa = row.remessa;
+    if (!remessa) {
+      const mRem = flat.match(/remessa\s+(\d{7})\b/i);
+      if (mRem) remessa = mRem[1];
+    }
+
+    const procs = [];
+    let m2;
+    const reProc = /(?:Item\s+\d+,\s+)?C[oó]digo:\s*(\d+),\s+Data:\s*(?:\d+\s+)*(\d{2}\/\d{2}\/\d{4}),\s+Desc:\s+(.*?),\s+Qtd:\s*(\d+)(?!\d)/g;
+    while ((m2 = reProc.exec(flat)) !== null) {
+      let desc = m2[3].replace(/\s+/g, ' ').trim();
+      desc = desc.replace(/^[\d\s]+(?=[A-Z\u00c0-\u00ff])/, '').trim();
+      desc = desc.replace(/,?\s*(Qtd:|Item\s+\d|C[oó]digo:|Lote:|Sexo:|Registro|Editar|Excluir).*/i, '').trim();
+      procs.push({ cod: m2[1], desc, qtd: m2[4] });
+    }
+    const reCons = /Data:\s*(?:\d+\s+)*\d{2}\/\d{2}\/\d{4},\s+Desc:\s+(CONSULTA[^,]+),\s+Qtd:\s*(\d+)/g;
+    while ((m2 = reCons.exec(flat)) !== null) {
+      if (!procs.some(p => p.desc.includes('CONSULTA'))) {
+        let d = m2[1].replace(/,?\s*(Qtd:|Item|C[oó]digo:|Guia).*/i, '').trim();
+        procs.push({ cod: '', desc: d, qtd: m2[2] });
+      }
+    }
+
+    let dataISO = '';
+    if (mDem) {
+      const p = mDem[1].split('/');
+      if (p.length === 3) dataISO = `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
+    }
+
+    guias.push({
+      num:         row.num,
+      benef:       row.benef || '',
+      remessa:     remessa || (mLote ? mLote[1] : ''),
+      dataEmissao: dataISO,
+      siass:       mSias ? mSias[1] : '',
+      lote:        mLote ? mLote[1] : '',
+      sexo:        mSexo ? mSexo[1] : '',
+      dataNasc:    mNasc ? mNasc[1] : '',
+      situacao:    'Guia em edi\u00e7\u00e3o',
+      valor:       row.valor || '',
+      procs,
+    });
+  }
+
+  return guias;
+}
+
+
+
+/* ============================================================
+   DB
+============================================================ */
+const SK='ggdb_v6';
+let db={guias:[],pagas:[],hist:[]};
+let eprocs=[],lastDel=null,lastConf=null,crows=[],pGuias=[];
+
+function load(){try{const s=localStorage.getItem(SK);if(s)db=JSON.parse(s);}catch(e){}db.guias=db.guias||[];db.pagas=db.pagas||[];db.hist=db.hist||[];}
+function save(){try{localStorage.setItem(SK,JSON.stringify(db));}catch(e){}}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function log(desc,type='info'){db.hist.unshift({id:uid(),desc,type,ts:new Date().toLocaleString('pt-BR')});if(db.hist.length>300)db.hist.length=300;save();}
+
+function nav(p,btn){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+  document.getElementById('page-'+p).classList.add('on');
+  if(btn)btn.classList.add('on');
+  if(p==='guias'){renderG();stG();}
+  if(p==='pagas')renderP();
+  if(p==='hist')renderH();
+}
+
+function R$(v){return 'R$ '+(parseFloat(v)||0).toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.');}
+function fmtD(iso){if(!iso)return'—';const[y,m,d]=iso.split('-');return`${d}/${m}/${y}`;}
+
+function stG(){
+  const g=db.guias,tot=g.reduce((a,x)=>a+(parseFloat(x.valor)||0),0),
+    pv=db.pagas.reduce((a,x)=>a+(parseFloat(x.valor)||0),0),
+    canc=g.filter(x=>x.situacao&&x.situacao.includes('Cancelada')).length;
+  document.getElementById('st-guias').innerHTML=`
+    <div class="scard"><div class="lbl">Total Guias</div><div class="val blue">${g.length}</div></div>
+    <div class="scard"><div class="lbl">Valor Total</div><div class="val">${R$(tot)}</div></div>
+    <div class="scard"><div class="lbl">A Pagar</div><div class="val amber">${R$(tot-pv)}</div></div>
+    <div class="scard"><div class="lbl">Pagas</div><div class="val green">${R$(pv)}</div></div>
+    <div class="scard"><div class="lbl">Canceladas</div><div class="val red">${canc}</div></div>`;
+  const sel=document.getElementById('frem'),cur=sel.value,rems=[...new Set(db.guias.map(g=>g.remessa).filter(Boolean))].sort();
+  sel.innerHTML='<option value="">Todas remessas</option>'+rems.map(r=>`<option${r===cur?' selected':''}>${r}</option>`).join('');
+}
+
+function sitB(s){
+  if(!s)return'<span class="bg bl">—</span>';
+  if(s.includes('edição'))return'<span class="bg bl"><i class="ti ti-pencil" style="font-size:10px"></i> Em edição</span>';
+  if(s.includes('anexada'))return'<span class="bg gr"><i class="ti ti-paperclip" style="font-size:10px"></i> Anexada</span>';
+  if(s.includes('Cancelada'))return'<span class="bg re"><i class="ti ti-ban" style="font-size:10px"></i> Cancelada</span>';
+  if(s.includes('Devolvida'))return'<span class="bg am"><i class="ti ti-arrow-back" style="font-size:10px"></i> Devolvida</span>';
+  return`<span class="bg bl">${s}</span>`;
+}
+function renderG(){
+  const q=(document.getElementById('sq').value||'').toLowerCase(),sit=document.getElementById('fsit').value,rem=document.getElementById('frem').value;
+  const rows=db.guias.filter(g=>(!q||(g.num||'').includes(q)||(g.benef||'').toLowerCase().includes(q))&&(!sit||g.situacao===sit)&&(!rem||g.remessa===rem));
+  const tb=document.getElementById('tbg'),em=document.getElementById('eg');
+  if(!rows.length){tb.innerHTML='';em.style.display='block';return;}em.style.display='none';
+  tb.innerHTML=rows.map(g=>`<tr>
+    <td><input type="checkbox" class="chk gchk" data-id="${g.id}" onchange="updSelG()"></td>
+    <td style="font-family:monospace;font-size:12px">${g.num}</td>
+    <td title="${g.benef}">${g.benef||'—'}</td>
+    <td>${g.remessa||'—'}</td><td>${fmtD(g.dataEmissao)}</td>
+    <td>${sitB(g.situacao)}</td>
+    <td style="font-weight:600">${g.valor?R$(g.valor):'—'}</td>
+    <td><div class="acol">
+      ${g.procs&&g.procs.length?`<button class="btn sm" onclick="viewProcs('${g.id}')"><i class="ti ti-list"></i></button>`:''}
+      <button class="btn sm" onclick="editG('${g.id}')"><i class="ti ti-edit"></i></button>
+      <button class="btn sm dan" onclick="delG('${g.id}')"><i class="ti ti-trash"></i></button>
+    </div></td>
+  </tr>`).join('');
+}
+
+function openNew(){eprocs=[];document.getElementById('eid').value='';document.getElementById('mgt').textContent='Nova Guia';['fn','fr2','fb','fl2','fv','fss'].forEach(id=>document.getElementById(id).value='');document.getElementById('fd').value=new Date().toISOString().slice(0,10);document.getElementById('fsi').value='Guia em edição';document.getElementById('fsx').value='';renderPL();document.getElementById('mg').style.display='flex';}
+function editG(id){const g=db.guias.find(x=>x.id===id);if(!g)return;eprocs=[...(g.procs||[])];document.getElementById('eid').value=id;document.getElementById('mgt').textContent='Editar Guia';document.getElementById('fn').value=g.num||'';document.getElementById('fr2').value=g.remessa||'';document.getElementById('fb').value=g.benef||'';document.getElementById('fd').value=g.dataEmissao||'';document.getElementById('fl2').value=g.lote||'';document.getElementById('fsi').value=g.situacao||'Guia em edição';document.getElementById('fv').value=g.valor||'';document.getElementById('fss').value=g.siass||'';document.getElementById('fsx').value=g.sexo||'';renderPL();document.getElementById('mg').style.display='flex';}
+function saveG(){const id=document.getElementById('eid').value,num=document.getElementById('fn').value.trim(),benef=document.getElementById('fb').value.trim();if(!num||!benef){toast('Preencha Nº Guia e Beneficiário','er');return;}const obj={id:id||uid(),num,benef,remessa:document.getElementById('fr2').value.trim(),dataEmissao:document.getElementById('fd').value,lote:document.getElementById('fl2').value.trim(),situacao:document.getElementById('fsi').value,valor:document.getElementById('fv').value.trim(),siass:document.getElementById('fss').value.trim(),sexo:document.getElementById('fsx').value,procs:eprocs};if(id){const i=db.guias.findIndex(x=>x.id===id);if(i>=0){obj.criadoEm=db.guias[i].criadoEm;db.guias[i]=obj;}log(`Guia ${num} editada`,'edit');}else{obj.criadoEm=new Date().toISOString();db.guias.push(obj);log(`Guia ${num} adicionada`,'add');}save();closeM('mg');renderG();stG();toast(id?'Atualizada!':'Adicionada!','ok');}
+function delG(id){const g=db.guias.find(x=>x.id===id);if(!g)return;if(!confirm(`Excluir guia ${g.num}?`))return;lastDel={g,idx:db.guias.findIndex(x=>x.id===id)};db.guias=db.guias.filter(x=>x.id!==id);save();renderG();stG();log(`Guia ${g.num} excluída`,'delete');document.getElementById('umsg').textContent=`Guia ${g.num} excluída.`;document.getElementById('ubar').style.display='flex';toast('Excluída','er');}
+function undoDel(){if(!lastDel)return;db.guias.splice(lastDel.idx,0,lastDel.g);save();renderG();stG();lastDel=null;document.getElementById('ubar').style.display='none';log('Exclusão desfeita','undo');toast('Desfeito','ok');}
+
+function togAllG(chk){
+  document.querySelectorAll('.gchk').forEach(c=>c.checked=chk.checked);
+  updSelG();
+}
+function updSelG(){
+  const sel=document.querySelectorAll('.gchk:checked');
+  const bar=document.getElementById('selbar');
+  if(sel.length>0){
+    bar.style.display='flex';
+    const val=([...sel]).reduce((a,c)=>{const g=db.guias.find(x=>x.id===c.dataset.id);return a+(parseFloat(g&&g.valor)||0);},0);
+    document.getElementById('selmsg').textContent=`${sel.length} guia(s) selecionada(s) — ${R$(val)}`;
+  } else {
+    bar.style.display='none';
+  }
+}
+function clearSelG(){
+  document.querySelectorAll('.gchk').forEach(c=>c.checked=false);
+  const ca=document.getElementById('chkallg');if(ca)ca.checked=false;
+  document.getElementById('selbar').style.display='none';
+}
+function delSel(){
+  const sel=[...document.querySelectorAll('.gchk:checked')].map(c=>c.dataset.id);
+  if(!sel.length)return;
+  if(!confirm(`Excluir ${sel.length} guia(s) selecionada(s)?`))return;
+  // Save for undo (only works for single, for multi just log)
+  const removed=db.guias.filter(g=>sel.includes(g.id));
+  db.guias=db.guias.filter(g=>!sel.includes(g.id));
+  save();renderG();stG();clearSelG();
+  log(`${removed.length} guia(s) excluída(s): ${removed.map(g=>g.num).join(', ')}`, 'delete');
+  toast(`${removed.length} guia(s) excluída(s)`,'er');
+}
+function addP(){const cod=document.getElementById('pc').value.trim(),desc=document.getElementById('pd').value.trim(),qtd=document.getElementById('pq').value.trim()||'1';if(!desc){toast('Informe a descrição','er');return;}eprocs.push({cod,desc,qtd});document.getElementById('pc').value='';document.getElementById('pd').value='';document.getElementById('pq').value='1';renderPL();}
+function rmP(i){eprocs.splice(i,1);renderPL();}
+function renderPL(){document.getElementById('plist').innerHTML=eprocs.length?eprocs.map((p,i)=>`<div class="pi"><div><div class="picod">${p.cod||'—'}</div><div class="pidet">${p.desc} × ${p.qtd}</div></div><button class="rm" onclick="rmP(${i})"><i class="ti ti-x"></i></button></div>`).join(''):'<div style="color:var(--tx3);font-size:12px">Nenhum procedimento</div>';}
+function viewProcs(id){const g=db.guias.find(x=>x.id===id)||db.pagas.find(x=>x.id===id);if(!g)return;document.getElementById('mdet-title').textContent=`Procedimentos — ${g.benef}`;const p=g.procs||[];document.getElementById('mdet-body').innerHTML=p.length?p.map(x=>`<div class="det-item"><div class="dc">${x.cod||'Sem código'} · Qtd: ${x.qtd}</div><div class="dn">${x.desc}</div></div>`).join('')+`<div style="margin-top:8px;font-size:12px;color:var(--tx3)">${p.length} procedimento(s)</div>`:'<div style="color:var(--tx3)">Nenhum.</div>';document.getElementById('mdet').style.display='flex';}
+
+/* ============================================================
+   PDF UPLOAD
+============================================================ */
+function openUpload(){document.getElementById('pprev').innerHTML='';document.getElementById('bimport').style.display='none';document.getElementById('pfi').value='';pGuias=[];document.getElementById('mu').style.display='flex';}
+
+async function handlePDF(input) {
+  const file = input.files[0]; if (!file) return;
+  document.getElementById('pprev').innerHTML=`<div class="prog-box"><i class="ti ti-loader spin"></i><p>Lendo PDF...</p></div>`;
+  document.getElementById('bimport').style.display='none';
+  try {
+    const ab = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: ab }).promise;
+    const allItems = [];
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const tc   = await page.getTextContent();
+      allItems.push(tc.items);
+    }
+    pGuias = parsePDFItems(allItems).map(g => ({ ...g, id: uid(), criadoEm: new Date().toISOString() }));
+    const total = pGuias.reduce((a,g) => a + (parseFloat(g.valor)||0), 0);
+    showPrev(pGuias, total);
+    toast(`${pGuias.length} guia(s) — ${R$(total)}`, 'ok');
+  } catch(e) {
+    document.getElementById('pprev').innerHTML=`<div style="color:var(--red);padding:16px;background:var(--redbg);border-radius:var(--r);margin-top:14px"><b>Erro:</b> ${e.message}</div>`;
+    console.error(e);
+  }
+}
+
+function showPrev(guias, total) {
+  const el = document.getElementById('pprev');
+  if (!guias.length) { el.innerHTML='<div style="color:var(--red);padding:12px;margin-top:14px">Nenhuma guia encontrada.</div>'; return; }
+  el.innerHTML=`<div style="margin-top:14px">
+    <div style="font-size:13px;color:var(--tx2);margin-bottom:10px"><b style="color:var(--green)">${guias.length}</b> guia(s) — Total: <b style="color:var(--amber)">${R$(total)}</b></div>`+
+    guias.map(g=>`<div style="background:var(--bg3);border:1px solid var(--bd);border-radius:6px;padding:8px 12px;margin-bottom:5px;font-size:12px;display:flex;align-items:center;gap:10px">
+      <span style="font-family:monospace;color:var(--blue);min-width:100px">${g.num}</span>
+      <span style="color:var(--tx2);flex:1">${g.benef||'(sem nome)'}</span>
+      <span style="color:var(--tx3)">${(g.procs||[]).length} proc.</span>
+      <span style="color:var(--green);font-weight:600;min-width:80px;text-align:right">${g.valor?R$(g.valor):'—'}</span>
+    </div>`).join('')+`</div>`;
+  document.getElementById('bimport').style.display='inline-flex';
+}
+
+function importPDF(){
+  let n=0,u=0;
+  for(const g of pGuias){
+    const ex=db.guias.find(x=>x.num===g.num);
+    if(ex){if(!ex.valor&&g.valor){ex.valor=g.valor;u++;}if((!ex.procs||!ex.procs.length)&&g.procs&&g.procs.length){ex.procs=g.procs;u++;}if(!ex.benef&&g.benef){ex.benef=g.benef;u++;}}
+    else{db.guias.push(g);n++;}
+  }
+  save();log(`PDF: ${n} novas, ${u} atualizadas`,'add');closeM('mu');renderG();stG();toast(`${n} novas, ${u} atualizadas`,'ok');
+}
+
+/* ============================================================
+   CONFERÊNCIA
+============================================================ */
+function conferir(){
+  const txt=document.getElementById('cpaste').value.trim();if(!txt){toast('Cole os dados','er');return;}
+  let lines=txt.split('\n').filter(l=>l.trim());
+  if(lines[0]&&(lines[0].toLowerCase().includes('tipo')||lines[0].toLowerCase().includes('guia do')))lines=lines.slice(1);
+  crows=[];
+  const wordsOf=n=>n.toLowerCase().replace(/\s+/g,' ').trim().split(' ').filter(w=>w.length>2);
+
+  for(const line of lines){
+    const c=line.split('\t');if(c.length<2)continue;
+    const numGuia=(c[1]||'').trim();
+    const benefArq=(c[3]||'').trim();
+    const remessa=(c[6]||'').trim();
+    const sitProc=(c[10]||'').trim();
+
+    const match=db.guias.find(g=>g.num===numGuia);
+
+    const isPago=sitProc.toLowerCase()==='pago';
+    crows.push({numGuia,benefArq,remessa,sitProc,match:match||null,selected:false});
+  }
+
+  renderConf();
+  document.getElementById('cres').style.display='block';
+}
+function sitProcBadge(s){
+  const sl=s.toLowerCase();
+  if(sl==='pago') return`<span class="bg gr" style="font-weight:700"><i class="ti ti-currency-dollar" style="font-size:10px"></i> Pago</span>`;
+  if(sl.includes('audit')) return`<span class="bg am">${s}</span>`;
+  if(sl.includes('cancel')||sl.includes('devolv')) return`<span class="bg re">${s}</span>`;
+  return`<span class="bg bl">${s||'—'}</span>`;
+}
+function renderConf(){
+  const matched=crows.filter(r=>r.match).length,
+    pagos=crows.filter(r=>r.match&&r.sitProc.toLowerCase()==='pago').length,
+    valMatch=crows.filter(r=>r.selected&&r.match&&r.sitProc.toLowerCase()==='pago').reduce((a,r)=>a+(parseFloat(r.match.valor)||0),0);
+  document.getElementById('st-conf').innerHTML=`
+    <div class="scard"><div class="lbl">Registros</div><div class="val blue">${crows.length}</div></div>
+    <div class="scard"><div class="lbl">Match no BD</div><div class="val green">${matched}</div></div>
+    <div class="scard"><div class="lbl">Pago + Match</div><div class="val amber">${pagos}</div></div>
+    <div class="scard"><div class="lbl">Valor a confirmar</div><div class="val green">${R$(valMatch)}</div></div>`;
+  document.getElementById('ctbody').innerHTML=crows.map((r,i)=>{
+    const isPago=r.sitProc.toLowerCase()==='pago';
+    return`<tr class="${r.match?'mok':'mno'}">
+      <td><input type="checkbox" class="chk cconf" data-idx="${i}" ${r.selected?'checked':''} onchange="onChkConf(${i},this.checked)"></td>
+      <td style="font-family:monospace;font-size:12px">${r.numGuia}</td>
+      <td title="${r.benefArq}" style="overflow:hidden;text-overflow:ellipsis">${r.benefArq}</td>
+      <td>${r.remessa||'—'}</td>
+      <td>${sitProcBadge(r.sitProc)}</td>
+      <td>${r.match?(isPago
+        ?`<span class="bg gr"><i class="ti ti-check" style="font-size:10px"></i> Match + Pago</span>`
+        :`<span class="bg am"><i class="ti ti-alert-triangle" style="font-size:10px"></i> Match, não pago</span>`)
+        :`<span class="bg re"><i class="ti ti-x" style="font-size:10px"></i> Não encontrada</span>`}</td>
+      <td style="font-weight:600">${r.match&&r.match.valor?R$(r.match.valor):'—'}</td>
+    </tr>`;
+  }).join('');
+  updSel();
+}
+function onChkConf(i,checked){crows[i].selected=checked;updSel();}
+function togAll(chk){
+  const val=chk.checked;
+  crows.forEach(r=>r.selected=val);
+  document.querySelectorAll('#ctbody .cconf').forEach(el=>el.checked=val);
+  updSel();
+}
+function updSel(){
+  const totalSel=crows.filter(r=>r.selected).length;
+  const selPago=crows.filter(r=>r.selected&&r.match&&r.sitProc.toLowerCase()==='pago');
+  const val=selPago.reduce((a,r)=>a+(parseFloat(r.match.valor)||0),0);
+  document.getElementById('selct').textContent=
+    totalSel>0?`${totalSel} selecionada(s) — ${selPago.length} com Match+Pago — ${R$(val)}`:'';
+}
+function confirmarSel(){
+  const sel=crows.filter(r=>r.selected);
+  if(!sel.length){toast('Selecione ao menos uma linha','er');return;}
+
+  const normName=n=>n.toLowerCase().replace(/\s+/g,' ').trim();
+  const wordsOf=n=>normName(n).split(' ').filter(w=>w.length>2);
+
+  const added=[];
+  const semMatch=[];
+  const naoPago=[];
+
+  for(const r of sel){
+    const isPago=r.sitProc.toLowerCase()==='pago';
+
+    // Busca no BD por número exato OU nome+remessa
+    const g=db.guias.find(x=>{
+      if(x.num===r.numGuia) return true;
+      if(r.remessa&&x.remessa&&x.remessa!==r.remessa) return false;
+      if(!r.benefArq||!x.benef) return false;
+      const wa=new Set(wordsOf(r.benefArq));
+      return wordsOf(x.benef).filter(w=>wa.has(w)).length>=2;
+    });
+
+    if(!g){semMatch.push(r.numGuia);continue;}
+    if(!isPago){naoPago.push(r.numGuia);continue;}
+    if(db.pagas.find(p=>p.id===g.id)) continue; // já paga
+
+    db.pagas.push({...g,dataPagto:new Date().toLocaleDateString('pt-BR')});
+    db.guias=db.guias.filter(x=>x.id!==g.id);
+    // Atualiza match no crow para refletir na tabela
+    r.match=g;
+    added.push(g.id);
+  }
+
+  if(!added.length){
+    let msg='Nenhuma guia confirmada.';
+    if(semMatch.length) msg+=` ${semMatch.length} não encontrada(s) no BD.`;
+    if(naoPago.length)  msg+=` ${naoPago.length} encontrada(s) mas situação não é Pago.`;
+    toast(msg,'er');return;
+  }
+
+  lastConf={added:[...added]};
+  save();log(`${added.length} guia(s) confirmadas como pagas`,'payment');
+  stG();renderG();renderP();
+  document.getElementById('cundomsg').textContent=`${added.length} confirmada(s). ${semMatch.length} sem match. ${naoPago.length} não pago.`;
+  document.getElementById('cundo').style.display='flex';
+  toast(`${added.length} confirmada(s) como pagas`,'ok');
+  // Desmarca seleção e re-renderiza
+  crows.forEach(r=>r.selected=false);
+  document.getElementById('chkall').checked=false;
+  renderConf();
+}
+function undoConf(){
+  if(!lastConf)return;
+  // Move guias back from pagas to guias
+  const toRestore=db.pagas.filter(p=>lastConf.added.includes(p.id));
+  db.guias.push(...toRestore.map(g=>{const {dataPagto,...rest}=g;return rest;}));
+  db.pagas=db.pagas.filter(p=>!lastConf.added.includes(p.id));
+  save();lastConf=null;
+  document.getElementById('cundo').style.display='none';
+  renderG();renderP();stG();
+  log('Confirmação de pagamento desfeita','undo');toast('Desfeito','ok');
+}
+function limparConf(){
+  document.getElementById('cpaste').value='';
+  document.getElementById('cres').style.display='none';
+  document.getElementById('cundo').style.display='none';
+  document.getElementById('selct').textContent='';
+  const ca=document.getElementById('chkall');if(ca)ca.checked=false;
+  crows=[];
+}
+
+function renderP(){
+  const q=(document.getElementById('sqp').value||'').toLowerCase(),rows=db.pagas.filter(g=>!q||(g.num||'').includes(q)||(g.benef||'').toLowerCase().includes(q)),total=db.pagas.reduce((a,x)=>a+(parseFloat(x.valor)||0),0);
+  document.getElementById('st-pagas').innerHTML=`<div class="scard"><div class="lbl">Total Pagas</div><div class="val green">${db.pagas.length}</div></div><div class="scard"><div class="lbl">Valor Total Pago</div><div class="val green">${R$(total)}</div></div>`;
+  const tb=document.getElementById('tbp'),em=document.getElementById('ep');
+  if(!rows.length){tb.innerHTML='';em.style.display='block';return;}em.style.display='none';
+  tb.innerHTML=rows.map(g=>`<tr>
+    <td style="font-family:monospace;font-size:12px">${g.num}</td><td title="${g.benef}">${g.benef||'—'}</td>
+    <td>${g.remessa||'—'}</td><td>${g.dataPagto||'—'}</td>
+    <td style="font-weight:600;color:var(--green)">${g.valor?R$(g.valor):'—'}</td>
+    <td><div class="acol">
+      ${g.procs&&g.procs.length?`<button class="btn sm" onclick="viewProcs('${g.id}')"><i class="ti ti-list"></i></button>`:''}
+      <button class="btn sm dan" onclick="unpagar('${g.id}')"><i class="ti ti-arrow-back-up"></i></button>
+    </div></td>
+  </tr>`).join('');
+}
+function unpagar(id){const p=db.pagas.find(x=>x.id===id);if(!p)return;if(!confirm(`Remover guia ${p.num} de pagas?`))return;db.pagas=db.pagas.filter(x=>x.id!==id);save();renderP();stG();log(`Guia ${p.num} removida de pagas`,'undo');toast('Removida','in');}
+
+function renderH(){
+  const el=document.getElementById('hlist'),em=document.getElementById('eh');
+  if(!db.hist.length){el.innerHTML='';em.style.display='block';return;}em.style.display='none';
+  const ic={add:'ti-plus',edit:'ti-edit',delete:'ti-trash',payment:'ti-currency-dollar',undo:'ti-arrow-back-up',info:'ti-info-circle'};
+  const co={add:'var(--green)',edit:'var(--blue)',delete:'var(--red)',payment:'var(--amber)',undo:'var(--purple)',info:'var(--tx2)'};
+  el.innerHTML=db.hist.map(h=>`<div class="hi"><i class="ti ${ic[h.type]||'ti-info-circle'}" style="color:${co[h.type]||'var(--tx2)'};font-size:15px"></i><span class="hid">${h.desc}</span><span class="hit">${h.ts}</span></div>`).join('');
+}
+
+function exportJSON(){const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='guias_backup.json';a.click();toast('Exportado','ok');}
+
+function exportRelatorio(){
+  const hoje = new Date().toLocaleDateString('pt-BR');
+  const totG = db.guias.reduce((a,x)=>a+(parseFloat(x.valor)||0),0);
+  const totP = db.pagas.reduce((a,x)=>a+(parseFloat(x.valor)||0),0);
+  const aPagar = totG - totP;
+
+  const rowG = db.guias.map(g=>
+    '<tr><td>'+g.num+'</td><td>'+(g.benef||'—')+'</td><td>'+(g.remessa||'—')+'</td><td>'+fmtD(g.dataEmissao)+'</td><td>'+(g.situacao||'—')+'</td><td style="text-align:right">'+(g.valor?R$(g.valor):'—')+'</td></tr>'
+  ).join('');
+
+  const rowP = db.pagas.map(g=>
+    '<tr><td>'+g.num+'</td><td>'+(g.benef||'—')+'</td><td>'+(g.remessa||'—')+'</td><td>'+(g.dataPagto||'—')+'</td><td style="text-align:right">'+(g.valor?R$(g.valor):'—')+'</td></tr>'
+  ).join('');
+
+  const secPagas = db.pagas.length ? (
+    '<h2>Guias Pagas ('+db.pagas.length+')</h2>'+
+    '<table><thead><tr><th>N\u00ba Guia</th><th>Benefici\u00e1rio</th><th>Remessa</th><th>Data Pgto</th><th style="text-align:right">Valor</th></tr></thead>'+
+    '<tbody>'+rowP+'</tbody>'+
+    '<tfoot><tr><td colspan="4">Total Pago</td><td style="text-align:right">'+R$(totP)+'</td></tr></tfoot></table>'
+  ) : '';
+
+  const css = [
+    '*{box-sizing:border-box;margin:0;padding:0}',
+    'body{font-family:Arial,sans-serif;font-size:12px;color:#111;padding:24px}',
+    'h1{font-size:18px;margin-bottom:4px;color:#1a1a2e}',
+    '.sub{font-size:12px;color:#666;margin-bottom:20px}',
+    '.resumo{display:flex;gap:20px;margin-bottom:24px;flex-wrap:wrap}',
+    '.card{border:1px solid #ddd;border-radius:6px;padding:12px 18px;min-width:160px}',
+    '.card .lbl{font-size:10px;text-transform:uppercase;color:#888;margin-bottom:3px}',
+    '.card .val{font-size:18px;font-weight:700}',
+    '.blue{color:#1a5fb4}.green{color:#1a7a4a}.amber{color:#b05e00}',
+    'h2{font-size:13px;font-weight:700;margin:20px 0 8px;text-transform:uppercase;color:#333;border-bottom:2px solid #1a5fb4;padding-bottom:4px}',
+    'table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:8px}',
+    'th{background:#1a5fb4;color:#fff;padding:6px 8px;text-align:left;font-weight:600}',
+    'td{padding:5px 8px;border-bottom:1px solid #eee}',
+    'tr:nth-child(even) td{background:#f8f8f8}',
+    'tfoot td{font-weight:700;background:#e8eef8;border-top:2px solid #1a5fb4}',
+    '.rodape{margin-top:24px;font-size:10px;color:#999;text-align:center}',
+    '@media print{body{padding:10px}@page{margin:15mm}}'
+  ].join('');
+
+  const html = '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">'
+    + '<title>Relat\u00f3rio de Guias</title>'
+    + '<style>'+css+'</style></head><body>'
+    + '<h1>Relat\u00f3rio de Guias M\u00e9dicas</h1>'
+    + '<div class="sub">Gerado em '+hoje+'</div>'
+    + '<div class="resumo">'
+    + '<div class="card"><div class="lbl">Total Guias</div><div class="val blue">'+db.guias.length+'</div></div>'
+    + '<div class="card"><div class="lbl">Valor Total</div><div class="val">'+R$(totG)+'</div></div>'
+    + '<div class="card"><div class="lbl">A Pagar</div><div class="val amber">'+R$(aPagar)+'</div></div>'
+    + '<div class="card"><div class="lbl">Pagas</div><div class="val green">'+R$(totP)+'</div></div>'
+    + '</div>'
+    + '<h2>Guias ('+db.guias.length+')</h2>'
+    + '<table><thead><tr><th>N\u00ba Guia</th><th>Benefici\u00e1rio</th><th>Remessa</th><th>Emiss\u00e3o</th><th>Situa\u00e7\u00e3o</th><th style="text-align:right">Valor</th></tr></thead>'
+    + '<tbody>'+rowG+'</tbody>'
+    + '<tfoot><tr><td colspan="5">Total</td><td style="text-align:right">'+R$(totG)+'</td></tr></tfoot></table>'
+    + secPagas
+    + '<div class="rodape">Gest\u00e3oGuias \u2014 '+hoje+'</div>'
+    + '<script>window.onload=function(){window.print();}<\/script>'
+    + '</body></html>';
+
+  const w = window.open('','_blank');
+  if(!w){toast('Permita pop-ups para gerar o relatório','er');return;}
+  w.document.write(html);
+  w.document.close();
+}
+function importJSON(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=e=>{try{const data=JSON.parse(e.target.result);if(data.guias){let n=0;for(const g of data.guias)if(!db.guias.find(x=>x.id===g.id)){db.guias.push(g);n++;}if(data.pagas)for(const p of data.pagas)if(!db.pagas.find(x=>x.id===p.id))db.pagas.push(p);save();renderG();stG();toast(`${n} guias importadas`,'ok');}}catch(ex){toast('JSON inválido','er');}};r.readAsText(f);inp.value='';}
+
+function closeM(id){document.getElementById(id).style.display='none';}
+function toast(msg,type='in'){const t=document.createElement('div');t.className='toast '+type;const ic={ok:'ti-check',er:'ti-alert-circle',in:'ti-info-circle'};t.innerHTML=`<i class="ti ${ic[type]||'ti-info-circle'}"></i>${msg}`;document.body.appendChild(t);setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .25s';setTimeout(()=>t.remove(),250);},3500);}
+
+const dz=document.getElementById('udrop');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('over');});
+dz.addEventListener('dragleave',()=>dz.classList.remove('over'));
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('over');const f=e.dataTransfer.files[0];if(f&&f.type==='application/pdf'){const dt=new DataTransfer();dt.items.add(f);document.getElementById('pfi').files=dt.files;handlePDF(document.getElementById('pfi'));}});
+
+load(); stG(); renderG();
+</script>
+</body>
+</html>
