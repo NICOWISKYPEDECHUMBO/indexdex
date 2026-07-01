@@ -817,6 +817,15 @@ function sitB(s){
 function renderG(){
   const q=(document.getElementById('sq').value||'').toLowerCase(),sit=document.getElementById('fsit').value,rem=document.getElementById('frem').value;
   const rows=db.guias.filter(g=>(!q||(g.num||'').includes(q)||(g.benef||'').toLowerCase().includes(q))&&(!sit||g.situacao===sit)&&(!rem||g.remessa===rem));
+  // Ordena por DATA DE EMISSÃO (mais antiga primeiro); sem data vai pro fim;
+  // desempate pelo Nº da guia.
+  rows.sort((a,b)=>{
+    const da=a.dataEmissao||'', db2=b.dataEmissao||'';
+    if(da&&db2&&da!==db2) return da<db2?-1:1;   // ISO YYYY-MM-DD ordena como texto
+    if(da&&!db2) return -1;
+    if(!da&&db2) return 1;
+    return (a.num||'').localeCompare(b.num||'');
+  });
   const tb=document.getElementById('tbg'),em=document.getElementById('eg');
   if(!rows.length){tb.innerHTML='';em.style.display='block';return;}em.style.display='none';
   tb.innerHTML=rows.map(g=>`<tr>
@@ -1205,6 +1214,12 @@ function limparConf(){
 
 function renderP(){
   const q=(document.getElementById('sqp').value||'').toLowerCase(),rows=db.pagas.filter(g=>!q||(g.num||'').includes(q)||(g.benef||'').toLowerCase().includes(q)),total=db.pagas.reduce((a,x)=>a+(parseFloat(x.valor)||0),0);
+  rows.sort((a,b)=>{
+    const da=a.dataEmissao||'', db2=b.dataEmissao||'';
+    if(da&&db2&&da!==db2) return da<db2?-1:1;
+    if(da&&!db2) return -1; if(!da&&db2) return 1;
+    return (a.num||'').localeCompare(b.num||'');
+  });
   document.getElementById('st-pagas').innerHTML=`<div class="scard"><div class="lbl">Total Pagas</div><div class="val green">${db.pagas.length}</div></div><div class="scard"><div class="lbl">Valor Total Pago</div><div class="val green">${R$(total)}</div></div>`;
   const tb=document.getElementById('tbp'),em=document.getElementById('ep');
   if(!rows.length){tb.innerHTML='';em.style.display='block';return;}em.style.display='none';
@@ -1296,7 +1311,39 @@ function exportRelatorio(){
   w.document.write(html);
   w.document.close();
 }
-function importJSON(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=e=>{try{const data=JSON.parse(e.target.result);if(data.guias){let n=0;for(const g of data.guias)if(!db.guias.find(x=>x.id===g.id)){db.guias.push(g);n++;}if(data.pagas)for(const p of data.pagas)if(!db.pagas.find(x=>x.id===p.id))db.pagas.push(p);save();renderG();stG();toast(`${n} guias importadas`,'ok');}}catch(ex){toast('JSON inválido','er');}};r.readAsText(f);inp.value='';}
+function importJSON(inp){
+  const f=inp.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      if(!data || (!Array.isArray(data.guias) && !Array.isArray(data.pagas))){
+        toast('JSON inválido ou sem guias','er');inp.value='';return;
+      }
+      const nG=(data.guias||[]).length, nP=(data.pagas||[]).length;
+      const atualG=db.guias.length, atualP=db.pagas.length;
+      // Substituição total: apaga tudo e vale SÓ o que está no arquivo.
+      if(!confirm(
+        `Importar este JSON vai SUBSTITUIR todos os dados atuais.\n\n`+
+        `Agora você tem: ${atualG} guia(s) e ${atualP} paga(s).\n`+
+        `O arquivo tem: ${nG} guia(s) e ${nP} paga(s).\n\n`+
+        `Deseja apagar o que existe e usar apenas o arquivo?`
+      )){inp.value='';return;}
+      // garante ids em cada registro (evita conflitos posteriores)
+      db.guias=(data.guias||[]).map(g=>({...g,id:g.id||uid()}));
+      db.pagas=(data.pagas||[]).map(p=>({...p,id:p.id||uid()}));
+      db.hist=Array.isArray(data.hist)?data.hist:(db.hist||[]);
+      save();
+      log(`JSON importado (substituição total): ${nG} guia(s), ${nP} paga(s)`,'add');
+      renderG();stG();renderP();renderH();
+      toast(`Substituído: ${nG} guia(s), ${nP} paga(s)`,'ok');
+    }catch(ex){
+      toast('JSON inválido','er');
+    }
+    inp.value='';
+  };
+  r.readAsText(f);
+}
 
 function closeM(id){document.getElementById(id).style.display='none';}
 function toast(msg,type='in'){const t=document.createElement('div');t.className='toast '+type;const ic={ok:'ti-check',er:'ti-alert-circle',in:'ti-info-circle'};t.innerHTML=`<i class="ti ${ic[type]||'ti-info-circle'}"></i>${msg}`;document.body.appendChild(t);setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .25s';setTimeout(()=>t.remove(),250);},3500);}
