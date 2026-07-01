@@ -998,44 +998,88 @@ function importPDF(){
 function conferir(){
   const txt=document.getElementById('cpaste').value.trim();if(!txt){toast('Cole os dados','er');return;}
   let lines=txt.split('\n').filter(l=>l.trim());
-  if(lines[0]&&(lines[0].toLowerCase().includes('tipo')||lines[0].toLowerCase().includes('guia do')))lines=lines.slice(1);
+  // remove cabeçalho se houver
+  if(lines[0]&&(lines[0].toLowerCase().includes('tipo')||lines[0].toLowerCase().includes('guia do prestador')||lines[0].toLowerCase().includes('situação do processamento')))lines=lines.slice(1);
   crows=[];
-  const wordsOf=n=>n.toLowerCase().replace(/\s+/g,' ').trim().split(' ').filter(w=>w.length>2);
+
+  // Status de processamento conhecidos (última coluna do arquivo).
+  // Detectados de forma tolerante (maiúsc/minúsc/acentos variam).
+  const norm = s => (s||'').toString().trim().toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,''); // remove acentos
 
   for(const line of lines){
-    const c=line.split('\t');if(c.length<2)continue;
-    const numGuia=(c[1]||'').trim();
-    const benefArq=(c[3]||'').trim();
-    const remessa=(c[6]||'').trim();
-    const sitProc=(c[10]||'').trim();
+    const c=line.split('\t').map(x=>(x||'').trim());
+    if(c.length<2)continue;
+
+    // Nº Guia = primeiro campo de 10 dígitos
+    let numGuia='';
+    for(const v of c){ if(/^\d{10}$/.test(v)){ numGuia=v; break; } }
+    if(!numGuia)continue;
+
+    // Situação de processamento = ÚLTIMO campo não-vazio da linha.
+    // (é sempre a última coluna: Pago / Em auditoria / Devolvida / etc.)
+    let sitProc='';
+    for(let i=c.length-1;i>=0;i--){ if(c[i]!==''){ sitProc=c[i]; break; } }
+
+    // Beneficiário = campo de texto mais "nome-like":
+    // contém letras e espaços, não é a situação, não é status.
+    let benefArq='';
+    for(const v of c){
+      if(v===sitProc)continue;
+      if(/\d/.test(v))continue;                 // pula números/datas/cnpj
+      if(/guia|remessa|auditoria|pago|devolvid|cancelad|edic|SADT|SP \//i.test(v))continue;
+      if(/^[A-Za-zÀ-ÿ'´` .]+$/.test(v) && v.replace(/\s/g,'').length>=4){
+        if(v.length>benefArq.length) benefArq=v;  // pega o mais longo (nome completo)
+      }
+    }
+
+    // Remessa = campo de 6-8 dígitos que NÃO é o nº da guia (10 díg) nem CNPJ (16 díg)
+    let remessa='';
+    for(const v of c){ if(/^\d{6,8}$/.test(v) && v!==numGuia){ remessa=v; break; } }
 
     const match=db.guias.find(g=>g.num===numGuia);
-
-    const isPago=sitProc.toLowerCase()==='pago';
     crows.push({numGuia,benefArq,remessa,sitProc,match:match||null,selected:false});
   }
 
+  // Ordena: linhas com Match primeiro, depois "Pago" no topo, para facilitar conferência
+  crows.sort((a,b)=>{
+    const am=a.match?1:0, bm=b.match?1:0;
+    if(am!==bm)return bm-am;
+    const ap=isPagoStatus(a.sitProc)?1:0, bp=isPagoStatus(b.sitProc)?1:0;
+    return bp-ap;
+  });
+
   renderConf();
   document.getElementById('cres').style.display='block';
+  const nMatch=crows.filter(r=>r.match).length;
+  const nPagoMatch=crows.filter(r=>r.match&&isPagoStatus(r.sitProc)).length;
+  toast(`${crows.length} linha(s) • ${nMatch} com match • ${nPagoMatch} pago+match`,'in');
+}
+
+// "Pago" de forma tolerante: aceita "Pago", "PAGO", "pago ", etc.
+// NÃO considera "Em auditoria", "Devolvida", "Cancelada" como pago.
+function isPagoStatus(s){
+  const t=(s||'').toString().trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  return t==='pago' || t==='paga' || t.startsWith('pago');
 }
 function sitProcBadge(s){
-  const sl=s.toLowerCase();
-  if(sl==='pago') return`<span class="bg gr" style="font-weight:700"><i class="ti ti-currency-dollar" style="font-size:10px"></i> Pago</span>`;
-  if(sl.includes('audit')) return`<span class="bg am">${s}</span>`;
-  if(sl.includes('cancel')||sl.includes('devolv')) return`<span class="bg re">${s}</span>`;
+  const sl=(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  if(isPagoStatus(s)) return`<span class="bg gr" style="font-weight:700"><i class="ti ti-currency-dollar" style="font-size:10px"></i> Pago</span>`;
+  if(sl.includes('audit')) return`<span class="bg am"><i class="ti ti-clock" style="font-size:10px"></i> ${s}</span>`;
+  if(sl.includes('cancel')||sl.includes('devolv')) return`<span class="bg re"><i class="ti ti-x" style="font-size:10px"></i> ${s}</span>`;
   return`<span class="bg bl">${s||'—'}</span>`;
 }
 function renderConf(){
   const matched=crows.filter(r=>r.match).length,
-    pagos=crows.filter(r=>r.match&&r.sitProc.toLowerCase()==='pago').length,
-    valMatch=crows.filter(r=>r.selected&&r.match&&r.sitProc.toLowerCase()==='pago').reduce((a,r)=>a+(parseFloat(r.match.valor)||0),0);
+    pagos=crows.filter(r=>r.match&&isPagoStatus(r.sitProc)).length,
+    valMatch=crows.filter(r=>r.selected&&r.match&&isPagoStatus(r.sitProc)).reduce((a,r)=>a+(parseFloat(r.match.valor)||0),0);
   document.getElementById('st-conf').innerHTML=`
     <div class="scard"><div class="lbl">Registros</div><div class="val blue">${crows.length}</div></div>
     <div class="scard"><div class="lbl">Match no BD</div><div class="val green">${matched}</div></div>
     <div class="scard"><div class="lbl">Pago + Match</div><div class="val amber">${pagos}</div></div>
     <div class="scard"><div class="lbl">Valor a confirmar</div><div class="val green">${R$(valMatch)}</div></div>`;
   document.getElementById('ctbody').innerHTML=crows.map((r,i)=>{
-    const isPago=r.sitProc.toLowerCase()==='pago';
+    const isPago=isPagoStatus(r.sitProc);
     return`<tr class="${r.match?'mok':'mno'}">
       <td><input type="checkbox" class="chk cconf" data-idx="${i}" ${r.selected?'checked':''} onchange="onChkConf(${i},this.checked)"></td>
       <td style="font-family:monospace;font-size:12px">${r.numGuia}</td>
@@ -1060,7 +1104,7 @@ function togAll(chk){
 }
 function updSel(){
   const totalSel=crows.filter(r=>r.selected).length;
-  const selPago=crows.filter(r=>r.selected&&r.match&&r.sitProc.toLowerCase()==='pago');
+  const selPago=crows.filter(r=>r.selected&&r.match&&isPagoStatus(r.sitProc));
   const val=selPago.reduce((a,r)=>a+(parseFloat(r.match.valor)||0),0);
   document.getElementById('selct').textContent=
     totalSel>0?`${totalSel} selecionada(s) — ${selPago.length} com Match+Pago — ${R$(val)}`:'';
@@ -1069,50 +1113,52 @@ function confirmarSel(){
   const sel=crows.filter(r=>r.selected);
   if(!sel.length){toast('Selecione ao menos uma linha','er');return;}
 
-  const normName=n=>n.toLowerCase().replace(/\s+/g,' ').trim();
-  const wordsOf=n=>normName(n).split(' ').filter(w=>w.length>2);
-
   const added=[];
   const semMatch=[];
   const naoPago=[];
+  const jaPagas=[];
 
   for(const r of sel){
-    const isPago=r.sitProc.toLowerCase()==='pago';
+    // 1) MATCH pelo Nº da Guia (chave única e confiável).
+    //    Só damos baixa com match EXATO de número — evita baixar guia errada.
+    const g = r.match && r.match.num===r.numGuia
+      ? r.match
+      : db.guias.find(x=>x.num===r.numGuia);
 
-    // Busca no BD por número exato OU nome+remessa
-    const g=db.guias.find(x=>{
-      if(x.num===r.numGuia) return true;
-      if(r.remessa&&x.remessa&&x.remessa!==r.remessa) return false;
-      if(!r.benefArq||!x.benef) return false;
-      const wa=new Set(wordsOf(r.benefArq));
-      return wordsOf(x.benef).filter(w=>wa.has(w)).length>=2;
-    });
+    if(!g){ semMatch.push(r.numGuia); continue; }
 
-    if(!g){semMatch.push(r.numGuia);continue;}
-    if(!isPago){naoPago.push(r.numGuia);continue;}
-    if(db.pagas.find(p=>p.id===g.id)) continue; // já paga
+    // 2) Só dá baixa se a situação na MESMA LINHA do arquivo for "Pago".
+    if(!isPagoStatus(r.sitProc)){ naoPago.push(r.numGuia); continue; }
 
-    db.pagas.push({...g,dataPagto:new Date().toLocaleDateString('pt-BR')});
+    // 3) Se já está em pagas, ignora (não duplica).
+    if(db.pagas.find(p=>p.id===g.id || p.num===g.num)){ jaPagas.push(r.numGuia); continue; }
+
+    // 4) Baixa: move de guias -> pagas, registrando a data.
+    db.pagas.push({...g, dataPagto:new Date().toLocaleDateString('pt-BR')});
     db.guias=db.guias.filter(x=>x.id!==g.id);
-    // Atualiza match no crow para refletir na tabela
     r.match=g;
     added.push(g.id);
   }
 
   if(!added.length){
-    let msg='Nenhuma guia confirmada.';
-    if(semMatch.length) msg+=` ${semMatch.length} não encontrada(s) no BD.`;
-    if(naoPago.length)  msg+=` ${naoPago.length} encontrada(s) mas situação não é Pago.`;
-    toast(msg,'er');return;
+    let msg='Nenhuma baixa feita.';
+    if(semMatch.length) msg+=` ${semMatch.length} sem match no BD.`;
+    if(naoPago.length)  msg+=` ${naoPago.length} não está "Pago".`;
+    if(jaPagas.length)  msg+=` ${jaPagas.length} já estava(m) paga(s).`;
+    toast(msg,'er');
+    return;
   }
 
   lastConf={added:[...added]};
-  save();log(`${added.length} guia(s) confirmadas como pagas`,'payment');
+  save();log(`${added.length} guia(s) baixada(s) como pagas via conferência`,'payment');
   stG();renderG();renderP();
-  document.getElementById('cundomsg').textContent=`${added.length} confirmada(s). ${semMatch.length} sem match. ${naoPago.length} não pago.`;
+  let resumo=`${added.length} baixada(s).`;
+  if(semMatch.length)resumo+=` ${semMatch.length} sem match.`;
+  if(naoPago.length)resumo+=` ${naoPago.length} não pago.`;
+  if(jaPagas.length)resumo+=` ${jaPagas.length} já paga.`;
+  document.getElementById('cundomsg').textContent=resumo;
   document.getElementById('cundo').style.display='flex';
-  toast(`${added.length} confirmada(s) como pagas`,'ok');
-  // Desmarca seleção e re-renderiza
+  toast(`${added.length} guia(s) baixada(s) como pagas`,'ok');
   crows.forEach(r=>r.selected=false);
   document.getElementById('chkall').checked=false;
   renderConf();
