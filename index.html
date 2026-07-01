@@ -225,6 +225,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.5;font-family:inherit}
     <input type="file" id="jin" accept=".json" style="display:none" onchange="importJSON(this)">
     <button class="btn" onclick="exportJSON()"><i class="ti ti-download"></i>Exportar JSON</button>
     <button class="btn" onclick="exportRelatorio()"><i class="ti ti-file-type-pdf"></i>Relatório PDF</button>
+    <button class="btn" onclick="corrigirDados()"><i class="ti ti-tool"></i>Corrigir Dados</button>
     <button class="btn dan" onclick="if(confirm('Limpar TODAS as guias? Isso não pode ser desfeito.')){db.guias=[];save();renderG();stG();toast('Todas as guias removidas','er')}"><i class="ti ti-trash"></i>Limpar Tudo</button>
     <button class="btn pri" onclick="openNew()"><i class="ti ti-plus"></i>Nova Guia</button>
   </div>
@@ -1411,6 +1412,44 @@ function ordenaData(a,b){
   if(da&&db2&&da!==db2) return da<db2?-1:1;
   if(da&&!db2) return -1; if(!da&&db2) return 1;
   return (a.num||'').localeCompare(b.num||'');
+}
+
+// Corrige dados corrompidos por versões antigas:
+// principal caso -> remessa gravada com o Nº da Guia (10 dígitos).
+// A remessa real tem 6-8 dígitos e é diferente do número.
+function corrigirDados(){
+  let corrRemessa=0, dupRemovidas=0;
+  const fix=g=>{
+    // remessa igual ao número (ou com 10+ dígitos) = errada -> limpa
+    if(g.remessa && (g.remessa===g.num || /^\d{9,}$/.test(g.remessa))){
+      g.remessa=''; corrRemessa++;
+    }
+  };
+  db.guias.forEach(fix);
+  db.pagas.forEach(fix);
+
+  // remove duplicatas por Nº de guia (mantém a primeira ocorrência)
+  const dedup=arr=>{
+    const vistos=new Set(); const out=[];
+    for(const g of arr){
+      if(g.num && vistos.has(g.num)){ dupRemovidas++; continue; }
+      if(g.num) vistos.add(g.num);
+      out.push(g);
+    }
+    return out;
+  };
+  db.guias=dedup(db.guias);
+  db.pagas=dedup(db.pagas);
+
+  // se uma guia está em pagas E em guias, remove das abertas (já foi paga)
+  const numPagas=new Set(db.pagas.map(p=>p.num));
+  const antes=db.guias.length;
+  db.guias=db.guias.filter(g=>!numPagas.has(g.num));
+  const removidasAbertas=antes-db.guias.length;
+
+  save();stG();renderG();renderP();
+  log(`Correção: ${corrRemessa} remessa(s), ${dupRemovidas} duplicata(s), ${removidasAbertas} aberta(s) já paga(s)`,'edit');
+  toast(`Corrigido: ${corrRemessa} remessa(s), ${dupRemovidas} duplicata(s), ${removidasAbertas} já paga(s) removida(s)`,'ok');
 }
 function importJSON(inp){
   const f=inp.files[0];if(!f)return;
