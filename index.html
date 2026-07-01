@@ -3,104 +3,211 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GestãoGuias</title>
+<title>GestãoGuias · 3D</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0d1117;--bg2:#161b27;--bg3:#1d2336;--bg4:#252d40;
-  --bd:#252d42;--bd2:#3a4a6a;
-  --tx:#dde3f0;--tx2:#8a97b8;--tx3:#4a5570;
-  --blue:#4e8df5;--bluebg:#0f1e3d;--blue2:#3370d4;
-  --green:#3ecf8e;--greenbg:#0a2318;--green2:#2aaa70;
-  --red:#f75a5a;--redbg:#2b0f0f;--red2:#c44040;
-  --amber:#f5b942;--amberbg:#2b1d08;
-  --purple:#a78bfa;--purplebg:#1c1040;
-  --r:8px;--r2:12px;
+  --bg:#070b14;--bg2:#0d1524;--bg3:#141f38;--bg4:#1c2c4d;
+  --glass:rgba(20,31,56,.55);--glass2:rgba(28,44,77,.65);
+  --bd:rgba(78,141,245,.14);--bd2:rgba(78,141,245,.35);
+  --tx:#eaf0ff;--tx2:#93a4c9;--tx3:#5a6b90;
+  --blue:#5b9bff;--bluebg:rgba(30,60,130,.35);--blue2:#3370d4;
+  --green:#3ee89a;--greenbg:rgba(14,60,40,.4);--green2:#2aaa70;
+  --red:#ff5f6d;--redbg:rgba(70,18,24,.45);--red2:#c44040;
+  --amber:#ffc447;--amberbg:rgba(70,48,10,.4);
+  --purple:#b28bff;--purplebg:rgba(45,22,90,.4);
+  --cyan:#38e6ff;
+  --r:12px;--r2:18px;--r3:24px;
+  --glow:0 0 0 1px var(--bd2),0 8px 30px rgba(4,10,25,.7),0 2px 8px rgba(0,0,0,.5);
+  --glowin:inset 0 1px 0 rgba(255,255,255,.06),inset 0 0 24px rgba(91,155,255,.04);
   font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;
 }
-body{background:var(--bg);color:var(--tx);min-height:100vh}
-.bar{background:var(--bg2);border-bottom:1px solid var(--bd);padding:0 20px;display:flex;align-items:center;gap:12px;height:52px;position:sticky;top:0;z-index:100}
-.logo{font-size:15px;font-weight:700;color:var(--blue);display:flex;align-items:center;gap:7px}
-.logo i{font-size:18px}
-.tabs{display:flex;gap:2px;margin-left:auto}
-.tab{padding:5px 14px;border-radius:6px;border:none;background:transparent;color:var(--tx2);cursor:pointer;font-size:13px;font-weight:500;display:flex;align-items:center;gap:5px;transition:.12s}
-.tab:hover{background:var(--bg3);color:var(--tx)}
-.tab.on{background:var(--bluebg);color:var(--blue)}
-.tab i{font-size:14px}
-.page{display:none;padding:20px;max-width:1400px;margin:0 auto}
+html,body{height:100%}
+body{
+  background:var(--bg);color:var(--tx);min-height:100vh;overflow-x:hidden;
+  background-image:
+    radial-gradient(900px 500px at 12% -8%,rgba(56,120,255,.18),transparent 60%),
+    radial-gradient(760px 480px at 92% 4%,rgba(120,80,255,.14),transparent 55%),
+    radial-gradient(700px 700px at 50% 120%,rgba(30,220,180,.08),transparent 60%);
+}
+/* animated grid floor */
+body::before{
+  content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;
+  background-image:linear-gradient(rgba(91,155,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(91,155,255,.05) 1px,transparent 1px);
+  background-size:46px 46px;
+  transform:perspective(500px) rotateX(62deg) translateY(20%) scale(2.4);
+  transform-origin:center top;
+  mask-image:linear-gradient(to bottom,transparent,#000 30%,#000 60%,transparent);
+  opacity:.5;
+}
+body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(1200px 700px at 50% -10%,transparent,rgba(7,11,20,.55) 90%)}
+
+/* ---------- top bar ---------- */
+.bar{
+  background:#0a0f1c;
+  background-image:linear-gradient(180deg,#0d1524,#0a0f1c);
+  border-bottom:1px solid var(--bd2);
+  padding:0 22px;display:flex;align-items:center;gap:14px;height:60px;position:sticky;top:0;z-index:100;
+  box-shadow:0 8px 30px rgba(3,7,16,.6);
+}
+.logo{font-size:16px;font-weight:800;letter-spacing:.3px;display:flex;align-items:center;gap:10px;
+  background:linear-gradient(90deg,#7fb3ff,#38e6ff 60%,#b28bff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.logo .cube{
+  width:30px;height:30px;border-radius:9px;display:grid;place-items:center;color:#fff;font-size:17px;
+  background:linear-gradient(145deg,#5b9bff,#3370d4);
+  box-shadow:0 6px 16px rgba(51,112,212,.5),inset 0 1px 0 rgba(255,255,255,.35),inset 0 -3px 6px rgba(0,0,0,.3);
+  transform:perspective(200px) rotateX(12deg) rotateY(-14deg);
+  animation:cubeFloat 5s ease-in-out infinite;
+}
+@keyframes cubeFloat{0%,100%{transform:perspective(200px) rotateX(12deg) rotateY(-14deg) translateY(0)}50%{transform:perspective(200px) rotateX(12deg) rotateY(10deg) translateY(-3px)}}
+.tabs{display:flex;gap:4px;margin-left:auto}
+.tab{
+  padding:8px 16px;border-radius:11px;border:1px solid transparent;background:transparent;color:var(--tx2);
+  cursor:pointer;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;
+  transition:.18s cubic-bezier(.2,.7,.3,1);transform-style:preserve-3d;
+}
+.tab:hover{background:var(--glass);color:var(--tx);border-color:var(--bd);transform:translateY(-2px)}
+.tab.on{background:linear-gradient(180deg,rgba(51,112,212,.5),rgba(30,60,130,.35));color:#fff;border-color:var(--bd2);
+  box-shadow:0 6px 18px rgba(30,60,130,.5),inset 0 1px 0 rgba(255,255,255,.15)}
+.tab i{font-size:15px}
+
+.page{display:none;padding:26px 22px;max-width:1440px;margin:0 auto;animation:pageIn .4s cubic-bezier(.2,.7,.3,1)}
 .page.on{display:block}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:20px}
-.scard{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r2);padding:14px 16px}
-.lbl{font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px}
-.val{font-size:20px;font-weight:700}
-.val.blue{color:var(--blue)}.val.green{color:var(--green)}.val.red{color:var(--red)}.val.amber{color:var(--amber)}
-.fbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
-.sw{position:relative;flex:1;min-width:180px}
-.sw i{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--tx3);font-size:15px;pointer-events:none}
-input[type=text],input[type=date],select,textarea{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);color:var(--tx);padding:7px 10px;font-size:13px;outline:none;transition:.12s}
-input:focus,select:focus,textarea:focus{border-color:var(--blue)}
-.sw input{padding-left:32px;width:100%}
+@keyframes pageIn{from{opacity:0;transform:translateY(14px) scale(.99)}to{opacity:1;transform:none}}
+
+/* ---------- stat cards 3D ---------- */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:14px;margin-bottom:24px}
+.scard{
+  position:relative;background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border:1px solid var(--bd);border-radius:var(--r2);padding:18px 18px 16px;
+  box-shadow:var(--glow),var(--glowin);overflow:hidden;transition:.25s cubic-bezier(.2,.7,.3,1);
+  transform-style:preserve-3d;
+}
+.scard::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;
+  background:linear-gradient(140deg,rgba(120,180,255,.4),transparent 40%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+.scard:hover{transform:translateY(-4px) rotateX(4deg);box-shadow:0 0 0 1px var(--bd2),0 18px 44px rgba(4,10,25,.8)}
+.scard .ico{position:absolute;right:14px;top:14px;font-size:22px;opacity:.22}
+.lbl{font-size:10.5px;color:var(--tx3);text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px;font-weight:700}
+.val{font-size:24px;font-weight:800;letter-spacing:.2px;line-height:1}
+.val.blue{color:var(--blue)}.val.green{color:var(--green)}.val.red{color:var(--red)}.val.amber{color:var(--amber)}.val.purple{color:var(--purple)}
+
+/* ---------- filter bar ---------- */
+.fbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+.sw{position:relative;flex:1;min-width:190px}
+.sw i{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--tx3);font-size:16px;pointer-events:none}
+input[type=text],input[type=date],select,textarea{
+  background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);color:var(--tx);
+  padding:9px 12px;font-size:13px;outline:none;transition:.16s;box-shadow:inset 0 1px 3px rgba(0,0,0,.35)}
+input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(91,155,255,.18),inset 0 1px 3px rgba(0,0,0,.35)}
+.sw input{padding-left:36px;width:100%}
 select option{background:var(--bg3)}
-.tw{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r2);overflow:hidden}
+
+/* ---------- table 3D glass ---------- */
+.tw{background:#0c1424;
+  border:1px solid var(--bd);border-radius:var(--r2);overflow:visible;box-shadow:var(--glow),var(--glowin)}
 table{width:100%;border-collapse:collapse;table-layout:fixed}
-th{background:var(--bg3);color:var(--tx2);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;padding:9px 12px;text-align:left;border-bottom:1px solid var(--bd)}
-td{padding:9px 12px;border-bottom:1px solid var(--bd);vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}
+th{background:#101a30;background-image:linear-gradient(180deg,#1a2a49,#101a30);color:var(--tx2);font-size:10.5px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.07em;padding:12px 14px;text-align:left;border-bottom:1px solid var(--bd2);position:sticky;top:60px;z-index:20;box-shadow:0 4px 14px rgba(4,10,25,.55)}
+td{padding:11px 14px;border-bottom:1px solid rgba(78,141,245,.08);vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}
 tr:last-child td{border-bottom:none}
-tr:hover td{background:var(--bg3)}
-.bg{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:600}
-.bg.gr{background:var(--greenbg);color:var(--green)}.bg.re{background:var(--redbg);color:var(--red)}
-.bg.am{background:var(--amberbg);color:var(--amber)}.bg.bl{background:var(--bluebg);color:var(--blue)}
-.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx);cursor:pointer;font-size:13px;font-weight:500;transition:.12s;white-space:nowrap}
-.btn:hover{background:var(--bg4);border-color:var(--blue)}
-.btn.pri{background:var(--blue);border-color:var(--blue2);color:#fff}.btn.pri:hover{background:var(--blue2)}
-.btn.dan{background:var(--redbg);border-color:var(--red2);color:var(--red)}.btn.dan:hover{background:#3a1212}
-.btn.suc{background:var(--greenbg);border-color:var(--green2);color:var(--green)}.btn.suc:hover{background:#0d2d1a}
-.btn.sm{padding:4px 9px;font-size:12px}.btn i{font-size:14px}
-.acol{display:flex;gap:5px;justify-content:flex-end}
-.ph{display:flex;align-items:center;gap:14px;margin-bottom:20px;flex-wrap:wrap}
-.pt{font-size:19px;font-weight:600}.sp{flex:1}
-.undo{background:var(--bg3);border:1px solid var(--amberbg);border-radius:var(--r);padding:9px 14px;display:flex;align-items:center;gap:10px;margin-bottom:14px}
-.undo i{color:var(--amber)}
-.mover{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px}
-.modal{background:var(--bg2);border:1px solid var(--bd2);border-radius:var(--r2);width:min(680px,100%);max-height:90vh;overflow-y:auto}
-.mhd{padding:18px 22px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:10px;position:sticky;top:0;background:var(--bg2);z-index:1}
-.mtt{font-size:15px;font-weight:600;flex:1}
-.mbody{padding:22px}.mft{padding:14px 22px;border-top:1px solid var(--bd);display:flex;gap:9px;justify-content:flex-end}
-.fg{margin-bottom:14px}.fl{font-size:12px;color:var(--tx2);margin-bottom:5px;display:block;font-weight:500}
+tbody tr{transition:.14s}
+tbody tr:hover td{background:rgba(51,112,212,.12)}
+.bg{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;border:1px solid transparent}
+.bg.gr{background:var(--greenbg);color:var(--green);border-color:rgba(62,232,154,.3)}
+.bg.re{background:var(--redbg);color:var(--red);border-color:rgba(255,95,109,.3)}
+.bg.am{background:var(--amberbg);color:var(--amber);border-color:rgba(255,196,71,.3)}
+.bg.bl{background:var(--bluebg);color:var(--blue);border-color:rgba(91,155,255,.3)}
+
+/* ---------- buttons 3D ---------- */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 15px;border-radius:var(--r);
+  border:1px solid var(--bd2);background:linear-gradient(180deg,var(--bg4),var(--bg3));color:var(--tx);
+  cursor:pointer;font-size:13px;font-weight:600;transition:.16s cubic-bezier(.2,.7,.3,1);white-space:nowrap;
+  box-shadow:0 4px 12px rgba(3,7,16,.5),inset 0 1px 0 rgba(255,255,255,.08)}
+.btn:hover{transform:translateY(-2px);border-color:var(--blue);box-shadow:0 8px 20px rgba(3,7,16,.6),0 0 0 1px rgba(91,155,255,.3),inset 0 1px 0 rgba(255,255,255,.12)}
+.btn:active{transform:translateY(0)}
+.btn.pri{background:linear-gradient(180deg,#5b9bff,#3370d4);border-color:#3370d4;color:#fff;box-shadow:0 6px 16px rgba(51,112,212,.5),inset 0 1px 0 rgba(255,255,255,.25)}
+.btn.pri:hover{box-shadow:0 10px 26px rgba(51,112,212,.65),inset 0 1px 0 rgba(255,255,255,.3)}
+.btn.dan{background:linear-gradient(180deg,#3a1620,#2b0f14);border-color:var(--red2);color:var(--red)}
+.btn.dan:hover{box-shadow:0 8px 20px rgba(70,18,24,.6),0 0 0 1px rgba(255,95,109,.35)}
+.btn.suc{background:linear-gradient(180deg,#0e3c28,#0a2e1e);border-color:var(--green2);color:var(--green)}
+.btn.suc:hover{box-shadow:0 8px 20px rgba(14,60,40,.6),0 0 0 1px rgba(62,232,154,.35)}
+.btn.sm{padding:6px 11px;font-size:12px}.btn i{font-size:15px}
+.acol{display:flex;gap:6px;justify-content:flex-end}
+
+/* ---------- page head ---------- */
+.ph{display:flex;align-items:center;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+.pt{font-size:22px;font-weight:800;letter-spacing:.3px;display:flex;align-items:center;gap:10px}
+.pt i{font-size:22px;color:var(--blue)}
+.sp{flex:1}
+
+.undo{background:var(--glass);backdrop-filter:blur(12px);border:1px solid var(--amberbg);border-radius:var(--r);
+  padding:12px 16px;display:flex;align-items:center;gap:12px;margin-bottom:16px;box-shadow:var(--glow)}
+.undo i{color:var(--amber);font-size:18px}
+
+/* ---------- modal 3D ---------- */
+.mover{position:fixed;inset:0;background:rgba(4,8,18,.72);backdrop-filter:blur(6px);z-index:200;display:flex;align-items:center;justify-content:center;padding:18px;animation:ovIn .2s ease}
+@keyframes ovIn{from{opacity:0}to{opacity:1}}
+.modal{background:linear-gradient(180deg,rgba(18,28,50,.96),rgba(11,18,32,.96));border:1px solid var(--bd2);
+  border-radius:var(--r3);width:min(700px,100%);max-height:90vh;overflow-y:auto;
+  box-shadow:0 30px 80px rgba(0,0,0,.7),0 0 0 1px var(--bd2),inset 0 1px 0 rgba(255,255,255,.08);
+  animation:mIn .3s cubic-bezier(.2,.8,.3,1)}
+@keyframes mIn{from{opacity:0;transform:translateY(24px) scale(.96) perspective(800px) rotateX(6deg)}to{opacity:1;transform:none}}
+.mhd{padding:20px 24px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:12px;position:sticky;top:0;
+  background:linear-gradient(180deg,rgba(18,28,50,.98),rgba(18,28,50,.9));z-index:1;backdrop-filter:blur(8px)}
+.mtt{font-size:16px;font-weight:700;flex:1}
+.mbody{padding:24px}.mft{padding:16px 24px;border-top:1px solid var(--bd);display:flex;gap:10px;justify-content:flex-end;position:sticky;bottom:0;background:linear-gradient(0deg,rgba(18,28,50,.98),rgba(18,28,50,.85));backdrop-filter:blur(8px)}
+.fg{margin-bottom:16px}.fl{font-size:12px;color:var(--tx2);margin-bottom:6px;display:block;font-weight:600}
 .fg input,.fg select,.fg textarea{width:100%}
-.fr{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-textarea{resize:vertical;min-height:80px;line-height:1.5}
-.plist{display:flex;flex-direction:column;gap:7px;margin-top:7px}
-.pi{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);padding:9px 11px;display:flex;align-items:center;gap:7px}
-.pi .rm{margin-left:auto;background:none;border:none;color:var(--red);cursor:pointer;padding:2px 4px;border-radius:4px}
-.pi .rm:hover{background:var(--redbg)}.pidet{flex:1;font-size:12px;color:var(--tx2)}.picod{font-weight:600;color:var(--tx);font-size:13px}
-.apr{display:grid;grid-template-columns:110px 1fr 70px auto;gap:7px;align-items:end;margin-bottom:7px}
-.uz{border:2px dashed var(--bd2);border-radius:var(--r2);padding:40px;text-align:center;cursor:pointer;transition:.2s;background:var(--bg2)}
-.uz:hover,.uz.over{border-color:var(--blue);background:var(--bluebg)}
-.uz i{font-size:36px;color:var(--blue);margin-bottom:10px;display:block}.uz p{color:var(--tx2);margin-bottom:6px}.uz small{color:var(--tx3);font-size:12px}
-.ctw{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r2);overflow:auto}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+textarea{resize:vertical;min-height:84px;line-height:1.5;font-family:inherit}
+.plist{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.pi{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);padding:10px 12px;display:flex;align-items:center;gap:8px;box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+.pi .rm{margin-left:auto;background:none;border:none;color:var(--red);cursor:pointer;padding:3px 5px;border-radius:6px}
+.pi .rm:hover{background:var(--redbg)}.pidet{flex:1;font-size:12px;color:var(--tx2)}.picod{font-weight:700;color:var(--tx);font-size:13px}
+.apr{display:grid;grid-template-columns:110px 1fr 70px auto;gap:8px;align-items:end;margin-bottom:8px}
+
+/* ---------- upload zone 3D ---------- */
+.uz{border:2px dashed var(--bd2);border-radius:var(--r3);padding:46px;text-align:center;cursor:pointer;transition:.25s;
+  background:linear-gradient(180deg,rgba(20,31,56,.5),rgba(13,21,36,.4));position:relative;overflow:hidden}
+.uz::before{content:"";position:absolute;inset:0;background:radial-gradient(400px 200px at 50% 0%,rgba(91,155,255,.12),transparent 70%);pointer-events:none}
+.uz:hover,.uz.over{border-color:var(--blue);background:linear-gradient(180deg,rgba(30,60,130,.35),rgba(20,31,56,.4));transform:translateY(-2px);box-shadow:0 14px 40px rgba(30,60,130,.4)}
+.uz i{font-size:42px;color:var(--blue);margin-bottom:12px;display:block;filter:drop-shadow(0 4px 12px rgba(91,155,255,.5))}
+.uz p{color:var(--tx);margin-bottom:6px;font-weight:600}.uz small{color:var(--tx3);font-size:12px}
+.ctw{background:var(--glass);border:1px solid var(--bd);border-radius:var(--r2);overflow:auto;box-shadow:var(--glow)}
 .ctw table td,.ctw table th{white-space:nowrap}
 .mok td:first-child{border-left:3px solid var(--green)}.mno td:first-child{border-left:3px solid transparent}
-.chk{width:16px;height:16px;accent-color:var(--blue);cursor:pointer}
-.toast{position:fixed;bottom:20px;right:20px;background:var(--bg3);border:1px solid var(--bd2);border-radius:var(--r);padding:10px 16px;display:flex;align-items:center;gap:9px;z-index:9999;font-size:13px;box-shadow:0 6px 20px rgba(0,0,0,.5);animation:tin .18s ease}
-@keyframes tin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.chk{width:17px;height:17px;accent-color:var(--blue);cursor:pointer}
+
+/* ---------- toast 3D ---------- */
+.toast{position:fixed;bottom:24px;right:24px;background:linear-gradient(180deg,rgba(28,44,77,.97),rgba(18,28,50,.97));
+  border:1px solid var(--bd2);border-radius:var(--r);padding:13px 18px;display:flex;align-items:center;gap:10px;z-index:9999;font-size:13px;font-weight:600;
+  box-shadow:0 14px 40px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.08);animation:tin .28s cubic-bezier(.2,.8,.3,1)}
+@keyframes tin{from{opacity:0;transform:translateX(30px) scale(.9)}to{opacity:1;transform:none}}
 .toast.ok{border-color:var(--green2);color:var(--green)}.toast.er{border-color:var(--red2);color:var(--red)}.toast.in{border-color:var(--blue2);color:var(--blue)}
-.hi{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);padding:10px 13px;margin-bottom:7px;display:flex;align-items:center;gap:11px}
+.toast i{font-size:17px}
+
+.hi{background:var(--glass);border:1px solid var(--bd);border-radius:var(--r);padding:12px 15px;margin-bottom:8px;display:flex;align-items:center;gap:12px;box-shadow:var(--glow),var(--glowin);transition:.16s}
+.hi:hover{transform:translateX(4px);border-color:var(--bd2)}
 .hid{flex:1;font-size:13px}.hit{font-size:11px;color:var(--tx3)}
-.empty{text-align:center;padding:44px;color:var(--tx3)}.empty i{font-size:32px;margin-bottom:10px;display:block}
-.det-item{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);padding:8px 12px;margin-bottom:6px}
-.det-item .dc{font-size:12px;color:var(--tx2)}.det-item .dn{font-size:13px;font-weight:500}
-.prog-box{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r2);padding:24px;text-align:center;margin-top:14px}
-.spin{animation:sp .9s linear infinite;display:inline-block;font-size:28px;color:var(--blue);margin-bottom:10px}
+.empty{text-align:center;padding:56px;color:var(--tx3)}.empty i{font-size:40px;margin-bottom:14px;display:block;opacity:.5}
+.det-item{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);padding:10px 14px;margin-bottom:8px;box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+.det-item .dc{font-size:12px;color:var(--tx2)}.det-item .dn{font-size:13px;font-weight:600}
+.prog-box{background:var(--glass);border:1px solid var(--bd);border-radius:var(--r2);padding:30px;text-align:center;margin-top:16px;box-shadow:var(--glow)}
+.spin{animation:sp .9s linear infinite;display:inline-block;font-size:34px;color:var(--blue);margin-bottom:12px;filter:drop-shadow(0 0 12px rgba(91,155,255,.6))}
 @keyframes sp{to{transform:rotate(360deg)}}
+::-webkit-scrollbar{width:11px;height:11px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--bg4),var(--bg3));border-radius:8px;border:2px solid var(--bg2)}
+::-webkit-scrollbar-thumb:hover{background:var(--blue2)}
 </style>
 </head>
 <body>
 
 <div class="bar">
-  <div class="logo"><i class="ti ti-stethoscope"></i>GestãoGuias</div>
+  <div class="logo"><span class="cube"><i class="ti ti-stethoscope"></i></span>GestãoGuias</div>
   <div class="tabs">
     <button class="tab on" onclick="nav('guias',this)"><i class="ti ti-file-text"></i>Guias</button>
     <button class="tab" onclick="nav('conf',this)"><i class="ti ti-checklist"></i>Conferir Pgto</button>
@@ -111,7 +218,7 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 
 <div id="page-guias" class="page on">
   <div class="ph">
-    <div class="pt">Guias</div><div class="sp"></div>
+    <div class="pt"><i class="ti ti-files"></i>Guias</div><div class="sp"></div>
     <button class="btn" onclick="openUpload()"><i class="ti ti-upload"></i>Importar PDF</button>
     <button class="btn" onclick="document.getElementById('jin').click()"><i class="ti ti-database-import"></i>JSON</button>
     <input type="file" id="jin" accept=".json" style="display:none" onchange="importJSON(this)">
@@ -141,8 +248,8 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
       <th style="width:34px"><input type="checkbox" class="chk" id="chkallg" onchange="togAllG(this)"></th>
       <th style="width:120px">Nº Guia</th><th>Beneficiário</th>
       <th style="width:90px">Remessa</th><th style="width:100px">Emissão</th>
-      <th style="width:120px">Situação</th><th style="width:85px">Valor (R$)</th>
-      <th style="width:110px">Ações</th>
+      <th style="width:130px">Situação</th><th style="width:95px">Valor (R$)</th>
+      <th style="width:120px">Ações</th>
     </tr></thead>
     <tbody id="tbg"></tbody>
   </table></div>
@@ -150,17 +257,17 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 </div>
 
 <div id="page-conf" class="page">
-  <div class="ph"><div class="pt">Conferir Pagamento</div></div>
-  <p style="color:var(--tx2);margin-bottom:14px;font-size:13px;line-height:1.6">Cole os dados da operadora (TSV copiado). Cruza por <b style="color:var(--tx)">Nº Guia</b>, <b style="color:var(--tx)">Remessa</b> e <b style="color:var(--tx)">Nome</b>.</p>
+  <div class="ph"><div class="pt"><i class="ti ti-checklist"></i>Conferir Pagamento</div></div>
+  <p style="color:var(--tx2);margin-bottom:16px;font-size:13px;line-height:1.6">Cole os dados da operadora (TSV copiado). Cruza por <b style="color:var(--tx)">Nº Guia</b>, <b style="color:var(--tx)">Remessa</b> e <b style="color:var(--tx)">Nome</b>.</p>
   <div class="fg"><label class="fl">Dados de pagamento</label>
-    <textarea id="cpaste" style="width:100%;min-height:130px;font-family:monospace;font-size:11px" placeholder="Tipo	Nº Guia do Prestador	Nº Carteira	Beneficiário	Autorização	Data de Emissão	Remessa	Lote	Doc	Situação da Guia	Situação do Processamento"></textarea>
+    <textarea id="cpaste" style="width:100%;min-height:140px;font-family:monospace;font-size:11px" placeholder="Tipo&#9;Nº Guia do Prestador&#9;Nº Carteira&#9;Beneficiário&#9;Autorização&#9;Data de Emissão&#9;Remessa&#9;Lote&#9;Doc&#9;Situação da Guia&#9;Situação do Processamento"></textarea>
   </div>
-  <div style="display:flex;gap:8px;margin-bottom:20px">
+  <div style="display:flex;gap:10px;margin-bottom:22px">
     <button class="btn pri" onclick="conferir()"><i class="ti ti-search"></i>Conferir</button>
     <button class="btn" onclick="limparConf()"><i class="ti ti-eraser"></i>Limpar</button>
   </div>
   <div id="cres" style="display:none">
-    <div class="stats" id="st-conf" style="margin-bottom:14px"></div>
+    <div class="stats" id="st-conf" style="margin-bottom:16px"></div>
     <div id="cundo" style="display:none" class="undo">
       <i class="ti ti-alert-triangle"></i><span id="cundomsg"></span><div class="sp"></div>
       <button class="btn sm" onclick="undoConf()"><i class="ti ti-arrow-back-up"></i>Desfazer</button>
@@ -173,8 +280,8 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
       <thead><tr>
         <th style="width:34px"><input type="checkbox" class="chk" id="chkall" onchange="togAll(this)"></th>
         <th style="width:120px">Nº Guia</th><th>Beneficiário (arquivo)</th>
-        <th style="width:90px">Remessa</th><th style="width:130px">Sit. Processamento</th>
-        <th style="width:100px">Match BD</th><th style="width:85px">Valor (R$)</th>
+        <th style="width:90px">Remessa</th><th style="width:140px">Sit. Processamento</th>
+        <th style="width:120px">Match BD</th><th style="width:95px">Valor (R$)</th>
       </tr></thead>
       <tbody id="ctbody"></tbody>
     </table></div>
@@ -182,7 +289,7 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 </div>
 
 <div id="page-pagas" class="page">
-  <div class="ph"><div class="pt">Guias Pagas</div><div class="sp"></div>
+  <div class="ph"><div class="pt"><i class="ti ti-circle-check"></i>Guias Pagas</div><div class="sp"></div>
     <button class="btn sm dan" onclick="if(confirm('Limpar lista de pagas?')){db.pagas=[];save();renderP()}"><i class="ti ti-trash"></i>Limpar</button>
   </div>
   <div class="stats" id="st-pagas"></div>
@@ -190,8 +297,8 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
   <div class="tw"><table>
     <thead><tr>
       <th style="width:120px">Nº Guia</th><th>Beneficiário</th>
-      <th style="width:90px">Remessa</th><th style="width:100px">Data Pgto</th>
-      <th style="width:85px">Valor (R$)</th><th style="width:90px">Ações</th>
+      <th style="width:90px">Remessa</th><th style="width:110px">Data Pgto</th>
+      <th style="width:95px">Valor (R$)</th><th style="width:90px">Ações</th>
     </tr></thead>
     <tbody id="tbp"></tbody>
   </table></div>
@@ -199,7 +306,7 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 </div>
 
 <div id="page-hist" class="page">
-  <div class="ph"><div class="pt">Histórico</div><div class="sp"></div>
+  <div class="ph"><div class="pt"><i class="ti ti-history"></i>Histórico</div><div class="sp"></div>
     <button class="btn sm dan" onclick="if(confirm('Limpar?')){db.hist=[];save();renderH()}"><i class="ti ti-trash"></i>Limpar</button>
   </div>
   <div id="hlist"></div>
@@ -209,7 +316,7 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 <!-- MODAL GUIA -->
 <div id="mg" class="mover" style="display:none" onclick="if(event.target===this)closeM('mg')">
 <div class="modal">
-  <div class="mhd"><i class="ti ti-file-text" style="color:var(--blue);font-size:18px"></i><div class="mtt" id="mgt">Nova Guia</div><button class="btn sm" onclick="closeM('mg')"><i class="ti ti-x"></i></button></div>
+  <div class="mhd"><i class="ti ti-file-text" style="color:var(--blue);font-size:19px"></i><div class="mtt" id="mgt">Nova Guia</div><button class="btn sm" onclick="closeM('mg')"><i class="ti ti-x"></i></button></div>
   <div class="mbody">
     <input type="hidden" id="eid">
     <div class="fr"><div class="fg"><label class="fl">Nº Guia *</label><input type="text" id="fn"></div><div class="fg"><label class="fl">Remessa</label><input type="text" id="fr2"></div></div>
@@ -233,12 +340,12 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 <!-- MODAL UPLOAD -->
 <div id="mu" class="mover" style="display:none" onclick="if(event.target===this)closeM('mu')">
 <div class="modal">
-  <div class="mhd"><i class="ti ti-file-type-pdf" style="color:var(--blue);font-size:18px"></i><div class="mtt">Importar PDF Mini-tickets</div><button class="btn sm" onclick="closeM('mu')"><i class="ti ti-x"></i></button></div>
+  <div class="mhd"><i class="ti ti-file-type-pdf" style="color:var(--blue);font-size:19px"></i><div class="mtt">Importar PDF Mini-tickets</div><button class="btn sm" onclick="closeM('mu')"><i class="ti ti-x"></i></button></div>
   <div class="mbody">
     <div class="uz" id="udrop" onclick="document.getElementById('pfi').click()">
       <i class="ti ti-file-type-pdf"></i>
       <p>Clique ou arraste o PDF aqui</p>
-      <small>Extrai todas as guias, valores e procedimentos automaticamente</small>
+      <small>Extrai todas as guias, nomes completos, valores, datas e procedimentos automaticamente</small>
     </div>
     <input type="file" id="pfi" accept=".pdf" style="display:none" onchange="handlePDF(this)">
     <div id="pprev"></div>
@@ -250,7 +357,7 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 <!-- MODAL PROCS -->
 <div id="mdet" class="mover" style="display:none" onclick="if(event.target===this)closeM('mdet')">
 <div class="modal">
-  <div class="mhd"><i class="ti ti-list" style="color:var(--blue);font-size:18px"></i><div class="mtt" id="mdet-title">Procedimentos</div><button class="btn sm" onclick="closeM('mdet')"><i class="ti ti-x"></i></button></div>
+  <div class="mhd"><i class="ti ti-list" style="color:var(--blue);font-size:19px"></i><div class="mtt" id="mdet-title">Procedimentos</div><button class="btn sm" onclick="closeM('mdet')"><i class="ti ti-x"></i></button></div>
   <div class="mbody"><div id="mdet-body"></div></div>
 </div>
 </div>
@@ -258,196 +365,374 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 <script>
 /* ============================================================
    pdf.js worker
+   Aponta para o worker do CDN (padrão). O carregamento do PDF em
+   handlePDF usa cascata de estratégias: se o worker falhar por
+   rede/CORS, processa no thread principal automaticamente.
 ============================================================ */
-pdfjsLib.GlobalWorkerOptions.workerSrc =
-  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+try {
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+} catch(e) {}
 
 /* ============================================================
-   PARSER
-   
-   Uses RAW item coordinates — the KEY insight from debug:
-   
-   Each guia has a "row" in the HTML table. In that row:
-   - The guia number (10 digits) sits at x ≈ 82
-   - The valor (float like 323.83) sits at x ≈ 436
-   - BOTH have the SAME Y coordinate (within ~3px)
-   
-   So we group all items by Y, find rows where a 10-digit num
-   and a float coexist, and extract valor that way.
-   
-   The text block (detail column at x ≈ 298) is parsed separately
-   for metadata and procedures — it's clean and sequential.
+   PARSER — reescrito (v7)
+
+   Estratégia robusta baseada em ÂNCORA + BANDA-Y, sem depender
+   de coordenadas X fixas frágeis:
+
+   1. Cada guia é ancorada pelo número de 10 dígitos (coluna Guia).
+      A coordenada X dessa coluna é DETECTADA dinamicamente.
+   2. O nome do beneficiário é coletado INTEIRO da coluna Nome,
+      pegando TODAS as linhas (Y) entre a âncora atual e a próxima.
+      -> resolve "comer nome / sobrar só sobrenome".
+   3. Valor, remessa: mesma banda-Y da âncora, colunas detectadas.
+   4. Datas / procedimentos / SIASS / lote: parseados do bloco de
+      texto da coluna Detalhes, separado por "Nº Guia do Prestador:".
+      -> resolve "comer datas e exames".
+
+   Tolerante a variações de coordenadas entre PDFs/versões do pdf.js.
 ============================================================ */
 
 function parsePDFItems(allPageItems) {
-  const EMOJI = new Set([...'👤👩👨🧑👦👧👴👵🧒🧔🧕']);
-  const NAME_SKIP = new Set([
-    'Guia','guia','anexada','à','remessa','edição','Nº','da','RG',
-    'RESPONSÁVEL','ÃO','Situação','Detalhes','Valor','Ações','Remessa',
-    'Identidade','Beneficiário','Aplicar','processamento','Status',
-    'após','(R$)','Editar','Excluir'
-  ]);
+  const EMOJI_RE = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F02F}\u{FE0F}]/u;
 
-  // ── STEP 1: Group all items by page and Y coordinate ──
-  // Returns array of pages, each page = array of {y, items:[{x,s,w}]}
-  function buildPageLines(items) {
-    const byY = new Map();
+  // Normaliza itens de todas as páginas para {x,y,s,w,page}
+  const items = [];
+  allPageItems.forEach((pageItems, pageIdx) => {
+    for (const it of pageItems) {
+      const s = (it.str || '');
+      if (!s.trim()) continue;
+      items.push({
+        x: it.transform[4],
+        y: it.transform[5],
+        w: it.width || 0,
+        s,
+        page: pageIdx
+      });
+    }
+  });
+  if (!items.length) return [];
+
+  /* ---- 1. Detecta a coluna do número da guia (âncoras) ----
+     Âncoras = números de 10 dígitos que aparecem MAIS À ESQUERDA.
+     Descobrimos o X típico das âncoras pegando o menor X entre
+     todos os números de 10 dígitos (a coluna Guia é a 2ª da esquerda). */
+  const tenDigit = items.filter(it => /^\d{10}$/.test(it.s.trim()));
+  if (!tenDigit.length) return [];
+
+  // A coluna "Guia" tem X pequeno (~82). Números de 10 díg. no bloco
+  // de detalhe (Nº Guia do Prestador) têm X grande (~385). Separamos
+  // pelo X: pega o cluster de menor X.
+  const xsSorted = tenDigit.map(it => it.x).sort((a, b) => a - b);
+  const anchorX = xsSorted[0];
+  const anchorTol = 40; // tolerância ampla
+
+  const anchors = tenDigit
+    .filter(it => Math.abs(it.x - anchorX) <= anchorTol)
+    .sort((a, b) => (a.page - b.page) || (b.y - a.y)); // topo->baixo por página
+
+  if (!anchors.length) return [];
+
+  // Palavras de título/cabeçalho que NÃO devem influenciar a detecção
+  // da coluna do nome (senão "gerados", "Beneficiário" etc. atrapalham).
+  const NAME_STOP_EARLY = new Set([
+    'gerados','Mini','tickets','Beneficiário','Remessa','Identidade','Guia',
+    'Situação','Detalhes','Valor','Ações','Status','após','processamento',
+    'Aplicar','Nº','da','Registro','Prestador','ANS','Data','Emissão',
+    'Nasc','SIASS','Lote','Sexo','Procedimentos','Desc','Qtd','Editar',
+    'Excluir','CPF','RG','RESPONSÁVEL','ÃO','pronta','para','cobrança',
+    'anexada','edição','em','Cancelada','Devolvida','Total','about','blank']);
+
+  /* ---- 2. Detecta colunas Nome / Remessa / Valor DINAMICAMENTE ----
+     NÃO usa offsets absolutos (que quebram se o pdf.js escalar as
+     coordenadas, ex: no modo "fake worker"). Em vez disso, mede o
+     espaçamento real entre colunas a partir dos próprios dados.
+
+     A coluna do NOME é a coluna de palavras alfabéticas mais à esquerda,
+     logo à direita da coluna do número. A coluna de VALOR são os floats
+     "N.NN" mais à direita. */
+
+  // Palavras alfabéticas (candidatas a nome), à direita da âncora.
+  // Ignora ruído de título/cabeçalho usando o X MAIS FREQUENTE (moda):
+  // o nome do beneficiário repete na mesma coluna em todas as guias,
+  // então é o cluster dominante — não o mínimo (que pega títulos soltos).
+  // OBS: o pdf.js junta palavras ("ANDRE LUIS"); validamos o 1º token.
+  const alphaWords = items.filter(it => {
+    const t = it.s.trim();
+    if (it.x <= anchorX || t.length < 2) return false;
+    const first = t.split(/\s+/)[0];
+    if (NAME_STOP_EARLY.has(first) || NAME_STOP_EARLY.has(t)) return false;
+    return /^[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ.'?\-]*$/.test(first);
+  });
+  // agrupa X em buckets de ~6px e acha o bucket mais populoso (mais à esquerda em empate)
+  let nameColX;
+  if (alphaWords.length) {
+    const buckets = new Map();
+    for (const w of alphaWords) {
+      const b = Math.round(w.x / 6) * 6;
+      if (!buckets.has(b)) buckets.set(b, { count: 0, sumX: 0 });
+      const e = buckets.get(b); e.count++; e.sumX += w.x;
+    }
+    let best = null;
+    for (const [b, e] of buckets) {
+      if (!best || e.count > best.count || (e.count === best.count && b < best.b)) {
+        best = { b, count: e.count, x: e.sumX / e.count };
+      }
+    }
+    nameColX = best.x;
+  } else {
+    nameColX = anchorX + 52;
+  }
+
+  // largura característica: distância da âncora ao nome (para escalar tudo)
+  const unit = Math.max(20, nameColX - anchorX); // ~52 no PDF normal
+
+  // Faixa do NOME: generosa à direita, mas antes da coluna Remessa/Detalhe.
+  // A coluna Remessa (7 dígitos) está ~1 unidade à direita do nome.
+  const nameXmin = nameColX - unit * 0.45;
+  const nameXmax = nameColX + unit * 1.15;   // cobre "LUIS"/"SILVA" deslocados
+
+  // Remessa: números de 6-8 dígitos entre o nome e a coluna de detalhe
+  const remXmin = nameColX + unit * 0.7;
+  const remXmax = nameColX + unit * 1.9;
+
+  // Valor: floats mais à direita
+  const floatItems = items.filter(it => /^\d{1,6}[.,]\d{2}$/.test(it.s.trim()));
+  const valColX = floatItems.length
+    ? floatItems.map(w => w.x).sort((a, b) => b - a)[0]  // mais à direita
+    : anchorX + 320;
+  const valXmin = valColX - unit * 1.2;
+
+  // Coluna Detalhes: bem à direita. Fica DEPOIS da coluna Situação
+  // (que traz "Guia pronta para cobrança"). Detalhe real ≈ nome + 3.1un;
+  // situação ≈ nome + 2.3un. Colocamos o corte em 2.75un (entre as duas).
+  const detailXmin = nameColX + unit * 2.75;
+
+  // Conjunto de "lixo" que nunca faz parte de um nome
+  const NAME_STOP = new Set(['Guia','pronta','para','cobrança','anexada','à','remessa',
+    'edição','Beneficiário','Nº','Aplicar','Situação','da','Detalhes','Valor','Ações',
+    'Status','após','processamento','Identidade','Remessa','Editar','Excluir','(R$)',
+    'Cancelada','Devolvida','em','Registro','RESPONSÁVEL','RG:','CPF:']);
+
+  function isNameWord(s) {
+    const t = s.trim();
+    if (t.length < 1) return false;
+    if (/^\d/.test(t)) return false;              // começa com dígito -> não é nome
+    if (EMOJI_RE.test(t)) return false;
+    // O pdf.js às vezes junta várias palavras num item ("ANDRE LUIS",
+    // "DA SILVA"). Então validamos TOKEN A TOKEN e descartamos os que
+    // são claramente cabeçalho/situação (NAME_STOP). Se sobrar ao menos
+    // um token válido de nome, aceitamos.
+    const toks = t.split(/\s+/);
+    let good = 0;
+    for (const w of toks) {
+      if (NAME_STOP.has(w)) return false;         // qualquer token de situação -> descarta o item todo
+      if (/^[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ.'?\-]*$/.test(w)) good++;
+    }
+    return good > 0;
+  }
+
+  /* ---- 3. Monta bloco de texto da coluna Detalhes (por página) ---- */
+  function buildDetailText() {
+    let out = '';
+    const byPage = {};
     for (const it of items) {
-      const y = Math.round(it.transform[5]);
-      if (!byY.has(y)) byY.set(y, []);
-      byY.get(y).push({ x: Math.round(it.transform[4]), s: it.str, w: it.width||0 });
+      if (it.x < detailXmin) continue;
+      (byPage[it.page] = byPage[it.page] || []).push(it);
     }
-    // Sort Y descending (top of page first in PDF coords)
-    return [...byY.entries()]
-      .sort((a,b) => b[0]-a[0])
-      .map(([y, items]) => ({ y, items: items.sort((a,b)=>a.x-b.x) }));
-  }
-
-  const pages = allPageItems.map(buildPageLines);
-
-  // ── STEP 2: Find emoji lines ──
-  const emojiLines = [];
-  for (let pi = 0; pi < pages.length; pi++) {
-    for (let li = 0; li < pages[pi].length; li++) {
-      const line = pages[pi][li];
-      if (line.items.some(it => [...it.s].some(c => EMOJI.has(c)))) {
-        emojiLines.push({ pi, li });
+    for (const pg of Object.keys(byPage).sort((a,b)=>a-b)) {
+      const arr = byPage[pg];
+      // agrupa por Y (linhas)
+      const byY = new Map();
+      for (const it of arr) {
+        const key = Math.round(it.y);
+        // agrupa Ys próximos
+        let placed = false;
+        for (const k of byY.keys()) { if (Math.abs(k - key) <= 3) { byY.get(k).push(it); placed = true; break; } }
+        if (!placed) byY.set(key, [it]);
       }
-    }
-  }
-
-  // ── STEP 3: Extract row data for each emoji ──
-  // From debug: num@x82, name@x133, remessa@x194, valor@x436
-  // These are FIXED coordinates in this PDF format
-  // Use tolerances: num x 70-100, name x 120-165, remessa x 180-220, valor x 400+
-
-  function extractRow(pi, li) {
-    let num = null, valor = null, remessa = null;
-    const nameParts = [];
-
-    for (let dl = -3; dl <= 8; dl++) {
-      const idx = li + dl;
-      if (idx < 0 || idx >= pages[pi].length) continue;
-      const line = pages[pi][idx];
-
-      for (const it of line.items) {
-        const s = it.s.trim();
-        if (!s) continue;
-
-        // Num: 10-digit at x≈82 (range 70-110)
-        if (it.x >= 70 && it.x <= 110 && /^\d{10}$/.test(s) && !num) {
-          num = s;
-        }
-        // Valor: float at x≈436 (range 400-500)
-        else if (it.x >= 400 && it.x <= 500 && /^\d{1,5}[.,]\d{2}$/.test(s) && !valor) {
-          const v = parseFloat(s.replace(',', '.'));
-          if (v > 0 && v < 50000) valor = v.toFixed(2);
-        }
-        // Remessa Model A: 7-digit at x≈194 (range 180-230) — remessa column
-        else if (it.x >= 180 && it.x <= 230 && /^\d{7}$/.test(s) && !remessa) {
-          remessa = s;
-        }
-        // Name: text at x≈133 (range 120-175)
-        else if (it.x >= 120 && it.x <= 175) {
-          const w = s;
-          if (w.length > 1 && !NAME_SKIP.has(w) && !/^\d/.test(w) &&
-              /^[A-ZÁÉÍÓÚÀÈÌÒÙÃÕÂÊÎÔÛÇa-záéíóúàèìòùãõâêîôûç]/.test(w)) {
-            nameParts.push({ y: line.y, s: w });
-          }
-        }
+      const lines = [...byY.entries()].sort((a,b) => b[0]-a[0]); // topo->baixo
+      for (const [, lineItems] of lines) {
+        lineItems.sort((a,b) => a.x - b.x);
+        // Sempre junta itens da mesma linha com espaço: cada item do pdf.js
+        // costuma ser uma "palavra" separada, então espaço entre eles
+        // reconstrói o texto legível de forma confiável (não depende de gaps).
+        const str = lineItems.map(it => it.s.trim()).filter(Boolean).join(' ');
+        if (str.trim()) out += str + '\n';
       }
+      out += '\n';
     }
-
-    // Sort name top→bottom, deduplicate
-    nameParts.sort((a,b) => b.y - a.y);
-    const seen = new Set();
-    const benef = nameParts
-      .map(p => p.s)
-      .filter(w => { if (seen.has(w)) return false; seen.add(w); return true; })
-      .join(' ');
-
-    return { num, benef, remessa, valor };
+    return out;
   }
 
-  const rows = emojiLines
-    .map(({pi, li}) => extractRow(pi, li))
-    .filter(r => r.num);
+  let fullText = buildDetailText();
+  // limpeza de ruído (cuidado para NÃO comer datas DD/MM/AAAA)
+  fullText = fullText
+    .replace(/\d{2}\/\d{2}\/\d{4},\s*\d{2}:\d{2}\s*Mini-tickets/g, '')
+    .replace(/about:blank[^\n]*/g, '')
+    .replace(/^\s*\d{1,3}\/\d{1,3}\s*$/mg, '')   // paginação isolada "1/1" (linha inteira)
+    .replace(/\bEditar\b|\bExcluir\b/g, '')
+    .replace(/^Total:.*$/mg, '')
+    .replace(/\n{3,}/g, '\n\n');
 
-  // ── STEP 4: Build full detail text (all pages concatenated) ──
-  // Only items at x >= 290 (detail column) sorted top→bottom per page
-  let fullText = '';
-  for (const lines of pages) {
-    for (const line of lines) {
-      // Detail column: x >= 290
-      const detailItems = line.items.filter(it => it.x >= 290);
-      if (!detailItems.length) continue;
-      let lineStr = '', lastX = null;
-      for (const it of detailItems) {
-        if (lastX !== null && it.x - lastX > 8) lineStr += ' ';
-        lineStr += it.s;
-        lastX = it.x + it.w;
-      }
-      if (lineStr.trim()) fullText += lineStr + '\n';
-    }
-    fullText += '\n';
-  }
-
-  // Clean noise
-  fullText = fullText.replace(/\d{2}\/\d{2}\/\d{4},\s*\d{2}:\d{2}\s*Mini-tickets/g, '');
-  fullText = fullText.replace(/about:blank[^\n]*/g, '');
-  fullText = fullText.replace(/\bEditar\b|\bExcluir\b/g, '');
-  fullText = fullText.replace(/^\d{1,2}\/\d{1,2}\s*$/mg, '');
-  // Remove header lines that contain known header keywords only
-  fullText = fullText.replace(/^(?:Remessa|Identidade(?:\s+Guia)?|Benefici\u00e1rio|Situa\u00e7\u00e3o|Detalhes|da Guia|Valor|\(R\$\)|Status|ap\u00f3s|A\u00e7\u00f5es|processamento\)|N\u00ba|Aplicar)\s*$/mg, '');
-  fullText = fullText.replace(/\n{3,}/g, '\n\n');
-
-  // Split by "Nº Guia do Prestador:" into per-guia blocks
+  // Split em blocos por "Nº Guia do Prestador:"
   const blockMap = {};
-  for (const blk of fullText.split(/N[º°]\s*Guia do Prestador:\s*/)) {
-    const nm = blk.match(/^\s*(\d{10})\b/);
-    if (nm) blockMap[nm[1]] = blk;
+  const parts = fullText.split(/N[º°o]\s*Guia do Prestador:\s*/);
+  for (const blk of parts) {
+    const m = blk.match(/^\s*(\d{10})\b/);
+    if (m) blockMap[m[1]] = blk;
   }
 
-  // ── STEP 5: Parse detail block for each row ──
-  const DATE = String.raw`(?:\d+\s+)*(\d{2}\/\d{2}\/\d{4})`;
-
+  /* ---- 4. Extrai cada guia ---- */
+  const DATE = String.raw`(\d{2}\/\d{2}\/\d{4})`;
   const guias = [];
-  for (const row of rows) {
-    const block = blockMap[row.num] || '';
-    const flat  = block.replace(/\s+/g, ' ');
 
-    const mDem  = flat.match(new RegExp('Data Emiss\u00e3o:\\s*' + DATE));
-    const mSias = flat.match(/Guia SIASS:\s*([\w.]+)/);
+  // Espaçamento típico entre âncoras (para estimar a altura de um registro).
+  // Usado para o primeiro (topo) e o último (fundo) registro da página.
+  const gaps = [];
+  for (let i = 1; i < anchors.length; i++) {
+    if (anchors[i].page === anchors[i-1].page) {
+      gaps.push(Math.abs(anchors[i-1].y - anchors[i].y));
+    }
+  }
+  gaps.sort((a,b)=>a-b);
+  const medGap = gaps.length ? gaps[Math.floor(gaps.length/2)] : 140;
+
+  for (let i = 0; i < anchors.length; i++) {
+    const a = anchors[i];
+    const num = a.s.trim();
+    const page = a.page;
+
+    // Âncora anterior e próxima NA MESMA PÁGINA
+    let prevA = null, nextA = null;
+    for (let j = i - 1; j >= 0; j--) { if (anchors[j].page === page) { prevA = anchors[j]; break; } }
+    for (let j = i + 1; j < anchors.length; j++) { if (anchors[j].page === page) { nextA = anchors[j]; break; } }
+
+    // Banda-Y = ponto médio até a âncora anterior (topo) e até a próxima (fundo).
+    // Cobre TODO o espaço do registro, sem depender de offsets fixos frágeis.
+    // -> resolve nome comido no topo (1ª linha) e no fundo (última linha).
+    const yTopBand = prevA ? (a.y + prevA.y) / 2 : a.y + medGap * 0.55;
+    const yBotBand = nextA ? (a.y + nextA.y) / 2 : a.y - medGap * 0.55;
+
+    // --- Nome completo (todas as linhas da coluna nome na banda) ---
+    // Faixa X AMPLA: qualquer palavra alfabética entre a coluna do número
+    // e a coluna de Detalhes. Não depende de um nameXmax estreito (que
+    // cortava "LUIS"/"DA SILVA" quando o pdf.js desloca as coordenadas).
+    // A remessa (dígitos) e a situação ("Guia pronta...") são descartadas
+    // por isNameWord + NAME_STOP.
+    const nameLeft  = anchorX + unit * 0.30;   // logo após o número
+    const nameRight = detailXmin - unit * 0.30; // logo antes do detalhe
+    const nameRaw = items.filter(it =>
+      it.page === page &&
+      it.y <= yTopBand && it.y > yBotBand &&
+      it.x >= nameLeft && it.x < nameRight &&
+      isNameWord(it.s)
+    );
+    // agrupa em linhas por proximidade de Y
+    const nameLines = [];
+    for (const it of nameRaw.slice().sort((p, q) => q.y - p.y)) {
+      let ln = nameLines.find(L => Math.abs(L.y - it.y) <= 5);
+      if (!ln) { ln = { y: it.y, items: [] }; nameLines.push(ln); }
+      ln.items.push(it);
+    }
+    const benef = nameLines
+      .sort((A, B) => B.y - A.y)                     // linhas: topo -> baixo
+      .map(L => L.items.sort((p, q) => p.x - q.x)     // dentro: esq -> dir
+                       .map(it => it.s.trim()).join(' '))
+      .join(' ')
+      .replace(/\s+/g, ' ').trim();
+
+    // --- Valor (mesma banda, coluna valor) ---
+    const valItem = items.find(it =>
+      it.page === page &&
+      it.y <= yTopBand && it.y > yBotBand &&
+      it.x >= valXmin &&
+      /^\d{1,6}[.,]\d{2}$/.test(it.s.trim())
+    );
+    let valor = '';
+    if (valItem) {
+      const v = parseFloat(valItem.s.trim().replace(',', '.'));
+      if (v > 0 && v < 1e6) valor = v.toFixed(2);
+    }
+
+    // --- Remessa (coluna remessa; senão do bloco) ---
+    let remessa = '';
+    const remItem = items.find(it =>
+      it.page === page &&
+      it.y <= yTopBand && it.y > yBotBand &&
+      it.x >= remXmin && it.x <= remXmax &&
+      /^\d{6,8}$/.test(it.s.trim()) &&
+      it.s.trim() !== num
+    );
+    if (remItem) remessa = remItem.s.trim();
+
+    // --- Bloco de detalhe ---
+    const block = blockMap[num] || '';
+    const flat = block.replace(/\s+/g, ' ');
+
+    const mDem  = flat.match(new RegExp('Data Emiss[aã]o:\\s*' + DATE));
+    const mSias = flat.match(/Guia SIASS:\s*([A-F0-9.]+)/i);
     const mLote = flat.match(/Lote:\s*(\d+)/);
-    const mSexo = flat.match(/Sexo:\s*(FEMININO|MASCULINO)/);
-    const mNasc = flat.match(new RegExp('Data Nasc\\.\\:\\s*' + DATE));
+    const mSexo = flat.match(/Sexo:\s*(FEMININO|MASCULINO)/i);
+    const mNasc = flat.match(new RegExp('Data Nasc\\.?:\\s*' + DATE));
 
-    // Remessa Model B: in detail block as "remessa XXXXXXX" or from Lote
-    // Model A already has remessa from x≈194 column
-    // Model B: look for 7-digit number after "remessa" keyword in block
-    let remessa = row.remessa;
-    if (!remessa) {
-      const mRem = flat.match(/remessa\s+(\d{7})\b/i);
-      if (mRem) remessa = mRem[1];
-    }
+    if (!remessa && mLote) remessa = ''; // remessa != lote; deixa vazio se não achou
 
+    // --- Procedimentos / exames (extração RESILIENTE em cascata) ---
+    // Objetivo: NUNCA deixar uma guia sem exame se o bloco tiver procedimentos.
     const procs = [];
+    const pushProc = (cod, desc, qtd) => {
+      desc = (desc || '').replace(/\s+/g, ' ').trim();
+      // remove cauda que invadiu de outros campos
+      desc = desc.replace(/,?\s*(Item\s+\d|C[oó]digo:|Lote:|Sexo:|Registro|Editar|Excluir|Guia\b|Data\s+Nasc|CPF:|RG:|Data\s+Emiss).*$/i, '').trim();
+      desc = desc.replace(/[,;]\s*$/, '').trim();
+      if (!desc) return;
+      // evita duplicar
+      if (procs.some(p => p.desc === desc && p.cod === (cod || ''))) return;
+      procs.push({ cod: cod || '', desc, qtd: (qtd || '1') });
+    };
+
+    // Isola a parte de procedimentos (depois de "Procedimentos:")
+    const procZone = (flat.split(/Procedimentos:/i)[1] || flat);
+
+    // Estratégia 1: "[Código: N,] Data: DD/MM/AAAA, Desc: <texto>, Qtd: N"
     let m2;
-    const reProc = /(?:Item\s+\d+,\s+)?C[oó]digo:\s*(\d+),\s+Data:\s*(?:\d+\s+)*(\d{2}\/\d{2}\/\d{4}),\s+Desc:\s+(.*?),\s+Qtd:\s*(\d+)(?!\d)/g;
-    while ((m2 = reProc.exec(flat)) !== null) {
-      let desc = m2[3].replace(/\s+/g, ' ').trim();
-      desc = desc.replace(/^[\d\s]+(?=[A-Z\u00c0-\u00ff])/, '').trim();
-      desc = desc.replace(/,?\s*(Qtd:|Item\s+\d|C[oó]digo:|Lote:|Sexo:|Registro|Editar|Excluir).*/i, '').trim();
-      procs.push({ cod: m2[1], desc, qtd: m2[4] });
+    const re1 = /(?:C[oó]digo:\s*(\d+)\s*,\s*)?Data:\s*\d{2}\/\d{2}\/\d{4}\s*,\s*Desc:\s*(.+?)\s*,\s*Qtd:\s*(\d+)/gi;
+    while ((m2 = re1.exec(procZone)) !== null) pushProc(m2[1], m2[2], m2[3]);
+
+    // Estratégia 2: "Desc: <texto>, Qtd: N" (sem Data antes)
+    if (!procs.length) {
+      const re2 = /Desc:\s*(.+?)\s*,\s*Qtd:\s*(\d+)/gi;
+      while ((m2 = re2.exec(procZone)) !== null) pushProc('', m2[1], m2[2]);
     }
-    const reCons = /Data:\s*(?:\d+\s+)*\d{2}\/\d{2}\/\d{4},\s+Desc:\s+(CONSULTA[^,]+),\s+Qtd:\s*(\d+)/g;
-    while ((m2 = reCons.exec(flat)) !== null) {
-      if (!procs.some(p => p.desc.includes('CONSULTA'))) {
-        let d = m2[1].replace(/,?\s*(Qtd:|Item|C[oó]digo:|Guia).*/i, '').trim();
-        procs.push({ cod: '', desc: d, qtd: m2[2] });
+
+    // Estratégia 3: "Código: N ... Descrição/Procedimento: <texto> ... Qtd/Quantidade: N"
+    if (!procs.length) {
+      const re3 = /(?:C[oó]d(?:igo)?[:\s]*(\d+)[\s,]*)?(?:Descri[cç][aã]o|Procedimento)[:\s]*(.+?)[\s,]*(?:Qtd|Quantidade)[:\s]*(\d+)/gi;
+      while ((m2 = re3.exec(procZone)) !== null) pushProc(m2[1], m2[2], m2[3]);
+    }
+
+    // Estratégia 4 (fallback): linha(s) com código TUSS de 8 dígitos + texto
+    // Formato comum de tabela: "12345678  NOME DO EXAME  1"
+    if (!procs.length) {
+      const re4 = /\b(\d{8})\b\s+([A-Za-zÀ-ÿ][^\n]{4,}?)\s+(\d{1,3})(?=\s|$)/g;
+      while ((m2 = re4.exec(procZone)) !== null) {
+        // ignora se "texto" parece uma data ou lixo
+        if (!/^\d/.test(m2[2].trim())) pushProc(m2[1], m2[2], m2[3]);
       }
     }
 
+    // Estratégia 5 (último recurso): captura descrições conhecidas de consulta/exame
+    if (!procs.length) {
+      const re5 = /((?:CONSULTA|EXAME|SESS[AÃ]O|PROCEDIMENTO|AVALIA[CÇ][AÃ]O|TERAPIA|FISIOTERAPIA|RAIO[- ]?X|ULTRA[- ]?SOM|TOMOGRAFIA|RESSON[AÂ]NCIA|HEMOGRAMA|ELETRO)[^\n,]{0,80})/gi;
+      let seen = new Set();
+      while ((m2 = re5.exec(procZone)) !== null) {
+        const d = m2[1].trim();
+        if (!seen.has(d)) { seen.add(d); pushProc('', d, '1'); }
+      }
+    }
+
+    // data ISO
     let dataISO = '';
     if (mDem) {
       const p = mDem[1].split('/');
@@ -455,23 +740,22 @@ function parsePDFItems(allPageItems) {
     }
 
     guias.push({
-      num:         row.num,
-      benef:       row.benef || '',
-      remessa:     remessa || (mLote ? mLote[1] : ''),
+      num,
+      benef:       benef || '',
+      remessa:     remessa || '',
       dataEmissao: dataISO,
       siass:       mSias ? mSias[1] : '',
       lote:        mLote ? mLote[1] : '',
-      sexo:        mSexo ? mSexo[1] : '',
+      sexo:        mSexo ? mSexo[1].toUpperCase() : '',
       dataNasc:    mNasc ? mNasc[1] : '',
-      situacao:    'Guia em edi\u00e7\u00e3o',
-      valor:       row.valor || '',
+      situacao:    'Guia em edição',
+      valor:       valor || '',
       procs,
     });
   }
 
   return guias;
 }
-
 
 
 /* ============================================================
@@ -502,13 +786,14 @@ function fmtD(iso){if(!iso)return'—';const[y,m,d]=iso.split('-');return`${d}/$
 function stG(){
   const g=db.guias,tot=g.reduce((a,x)=>a+(parseFloat(x.valor)||0),0),
     pv=db.pagas.reduce((a,x)=>a+(parseFloat(x.valor)||0),0),
-    canc=g.filter(x=>x.situacao&&x.situacao.includes('Cancelada')).length;
+    canc=g.filter(x=>x.situacao&&x.situacao.includes('Cancelada')).length,
+    semEx=g.filter(x=>!x.procs||!x.procs.length).length;
   document.getElementById('st-guias').innerHTML=`
-    <div class="scard"><div class="lbl">Total Guias</div><div class="val blue">${g.length}</div></div>
-    <div class="scard"><div class="lbl">Valor Total</div><div class="val">${R$(tot)}</div></div>
-    <div class="scard"><div class="lbl">A Pagar</div><div class="val amber">${R$(tot-pv)}</div></div>
-    <div class="scard"><div class="lbl">Pagas</div><div class="val green">${R$(pv)}</div></div>
-    <div class="scard"><div class="lbl">Canceladas</div><div class="val red">${canc}</div></div>`;
+    <div class="scard"><i class="ti ti-files ico"></i><div class="lbl">Total Guias</div><div class="val blue">${g.length}</div></div>
+    <div class="scard"><i class="ti ti-cash ico"></i><div class="lbl">Valor Total</div><div class="val">${R$(tot)}</div></div>
+    <div class="scard"><i class="ti ti-clock-dollar ico"></i><div class="lbl">A Pagar</div><div class="val amber">${R$(tot-pv)}</div></div>
+    <div class="scard"><i class="ti ti-circle-check ico"></i><div class="lbl">Pagas</div><div class="val green">${R$(pv)}</div></div>
+    <div class="scard"><i class="ti ti-alert-triangle ico"></i><div class="lbl">Sem Exame</div><div class="val ${semEx?'red':'green'}">${semEx}</div></div>`;
   const sel=document.getElementById('frem'),cur=sel.value,rems=[...new Set(db.guias.map(g=>g.remessa).filter(Boolean))].sort();
   sel.innerHTML='<option value="">Todas remessas</option>'+rems.map(r=>`<option${r===cur?' selected':''}>${r}</option>`).join('');
 }
@@ -534,7 +819,9 @@ function renderG(){
     <td>${sitB(g.situacao)}</td>
     <td style="font-weight:600">${g.valor?R$(g.valor):'—'}</td>
     <td><div class="acol">
-      ${g.procs&&g.procs.length?`<button class="btn sm" onclick="viewProcs('${g.id}')"><i class="ti ti-list"></i></button>`:''}
+      ${g.procs&&g.procs.length
+        ? `<button class="btn sm" title="${g.procs.length} procedimento(s)" onclick="viewProcs('${g.id}')"><i class="ti ti-list"></i>${g.procs.length}</button>`
+        : `<button class="btn sm dan" title="Sem exames capturados — clique para editar" onclick="editG('${g.id}')"><i class="ti ti-alert-triangle"></i></button>`}
       <button class="btn sm" onclick="editG('${g.id}')"><i class="ti ti-edit"></i></button>
       <button class="btn sm dan" onclick="delG('${g.id}')"><i class="ti ti-trash"></i></button>
     </div></td>
@@ -588,20 +875,43 @@ function viewProcs(id){const g=db.guias.find(x=>x.id===id)||db.pagas.find(x=>x.i
 ============================================================ */
 function openUpload(){document.getElementById('pprev').innerHTML='';document.getElementById('bimport').style.display='none';document.getElementById('pfi').value='';pGuias=[];document.getElementById('mu').style.display='flex';}
 
+// Carrega o PDF tentando várias estratégias, para nunca travar no worker.
+async function loadPdfDocument(ab) {
+  const WORKER_URL = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+  // Estratégia 1: worker do CDN (padrão que já funcionava)
+  try {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = WORKER_URL;
+    return await pdfjsLib.getDocument({ data: ab.slice(0) }).promise;
+  } catch (e1) {
+    // Estratégia 2: sem worker (thread principal) — se o CDN falhar
+    try {
+      try { pdfjsLib.GlobalWorkerOptions.workerSrc = ''; } catch(_) {}
+      return await pdfjsLib.getDocument({
+        data: ab.slice(0), disableWorker: true, isEvalSupported: false
+      }).promise;
+    } catch (e2) {
+      throw new Error('Não foi possível ler o PDF. Verifique sua conexão e tente novamente. (' + (e1.message||e1) + ')');
+    }
+  }
+}
+
+let _lastRawItems = null; // guarda itens crus do último PDF (p/ diagnóstico)
+
 async function handlePDF(input) {
   const file = input.files[0]; if (!file) return;
   document.getElementById('pprev').innerHTML=`<div class="prog-box"><i class="ti ti-loader spin"></i><p>Lendo PDF...</p></div>`;
   document.getElementById('bimport').style.display='none';
   try {
     const ab = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: ab }).promise;
+    const pdf = await loadPdfDocument(ab);
     const allItems = [];
     for (let i = 1; i <= pdf.numPages; i++) {
       const page = await pdf.getPage(i);
       const tc   = await page.getTextContent();
       allItems.push(tc.items);
     }
-    pGuias = parsePDFItems(allItems).map(g => ({ ...g, id: uid(), criadoEm: new Date().toISOString() }));
+    _lastRawItems = allItems; // guarda p/ diagnóstico
+    pGuias = (parsePDFItems(allItems)||[]).map(g => ({ ...g, id: uid(), criadoEm: new Date().toISOString() }));
     const total = pGuias.reduce((a,g) => a + (parseFloat(g.valor)||0), 0);
     showPrev(pGuias, total);
     toast(`${pGuias.length} guia(s) — ${R$(total)}`, 'ok');
@@ -611,11 +921,34 @@ async function handlePDF(input) {
   }
 }
 
+// Diagnóstico: gera um relatório do que o pdf.js leu (coordenadas das
+// palavras da coluna esquerda) para calibrar o parser quando um nome
+// vem cortado. Copia para a área de transferência e mostra na tela.
+function diagPDF(){
+  if(!_lastRawItems){toast('Importe um PDF primeiro','er');return;}
+  const items=[];
+  _lastRawItems.forEach((pg,pi)=>{for(const it of pg){const s=it.str||'';if(!s.trim())continue;
+    items.push({x:+it.transform[4].toFixed(1),y:+it.transform[5].toFixed(1),s,page:pi});}});
+  // foca na metade esquerda (número + nome + remessa + situação)
+  const maxX=Math.max(...items.map(i=>i.x));
+  const left=items.filter(i=>i.x < maxX*0.55).sort((a,b)=>(a.page-b.page)||(b.y-a.y)||(a.x-b.x));
+  let txt='=== DIAGNÓSTICO GestãoGuias ===\n';
+  txt+='pdf.js '+(pdfjsLib.version||'?')+' | itens:'+items.length+' | maxX:'+maxX.toFixed(0)+'\n';
+  txt+='(x, y) :: texto\n';
+  for(const it of left) txt+=`(${it.x}, ${it.y}) :: ${it.s}\n`;
+  // tenta copiar
+  try{ navigator.clipboard.writeText(txt); toast('Diagnóstico copiado! Cole aqui no chat','ok'); }
+  catch(_){ toast('Veja o diagnóstico abaixo','in'); }
+  const el=document.getElementById('pprev');
+  el.innerHTML+=`<div style="margin-top:14px"><div style="font-size:12px;color:var(--amber);margin-bottom:6px"><b>Diagnóstico</b> — copie TUDO abaixo e cole no chat:</div>
+    <textarea readonly style="width:100%;min-height:180px;font-family:monospace;font-size:10px" onclick="this.select()">${txt.replace(/</g,'&lt;')}</textarea></div>`;
+}
+
 function showPrev(guias, total) {
   const el = document.getElementById('pprev');
   if (!guias.length) { el.innerHTML='<div style="color:var(--red);padding:12px;margin-top:14px">Nenhuma guia encontrada.</div>'; return; }
   el.innerHTML=`<div style="margin-top:14px">
-    <div style="font-size:13px;color:var(--tx2);margin-bottom:10px"><b style="color:var(--green)">${guias.length}</b> guia(s) — Total: <b style="color:var(--amber)">${R$(total)}</b></div>`+
+    <div style="font-size:13px;color:var(--tx2);margin-bottom:10px;display:flex;align-items:center;gap:10px"><span><b style="color:var(--green)">${guias.length}</b> guia(s) — Total: <b style="color:var(--amber)">${R$(total)}</b></span><button class="btn sm" style="margin-left:auto" onclick="diagPDF()"><i class="ti ti-bug"></i>Diagnóstico</button></div>`+
     guias.map(g=>`<div style="background:var(--bg3);border:1px solid var(--bd);border-radius:6px;padding:8px 12px;margin-bottom:5px;font-size:12px;display:flex;align-items:center;gap:10px">
       <span style="font-family:monospace;color:var(--blue);min-width:100px">${g.num}</span>
       <span style="color:var(--tx2);flex:1">${g.benef||'(sem nome)'}</span>
@@ -626,13 +959,37 @@ function showPrev(guias, total) {
 }
 
 function importPDF(){
+  if(!pGuias||!pGuias.length){toast('Nada para importar','er');return;}
   let n=0,u=0;
   for(const g of pGuias){
-    const ex=db.guias.find(x=>x.num===g.num);
-    if(ex){if(!ex.valor&&g.valor){ex.valor=g.valor;u++;}if((!ex.procs||!ex.procs.length)&&g.procs&&g.procs.length){ex.procs=g.procs;u++;}if(!ex.benef&&g.benef){ex.benef=g.benef;u++;}}
-    else{db.guias.push(g);n++;}
+    // procura guia existente pelo número (chave real)
+    const ex=db.guias.find(x=>x.num===g.num) || db.pagas.find(x=>x.num===g.num);
+    if(ex){
+      let changed=false;
+      // completa/atualiza TODOS os campos vindos do PDF sem apagar o que já existe
+      const fields=['benef','remessa','dataEmissao','siass','lote','sexo','dataNasc','valor'];
+      for(const f of fields){
+        if(g[f] && (!ex[f] || ex[f]==='' )){ ex[f]=g[f]; changed=true; }
+      }
+      // procedimentos: mescla sem duplicar
+      if(g.procs&&g.procs.length){
+        ex.procs=ex.procs||[];
+        for(const p of g.procs){
+          if(!ex.procs.some(q=>q.cod===p.cod && q.desc===p.desc)){ ex.procs.push(p); changed=true; }
+        }
+      }
+      if(changed)u++;
+    } else {
+      // garante id e data de criação
+      if(!g.id)g.id=uid();
+      if(!g.criadoEm)g.criadoEm=new Date().toISOString();
+      db.guias.push(g);n++;
+    }
   }
-  save();log(`PDF: ${n} novas, ${u} atualizadas`,'add');closeM('mu');renderG();stG();toast(`${n} novas, ${u} atualizadas`,'ok');
+  save();
+  log(`PDF importado: ${n} nova(s), ${u} atualizada(s)`,'add');
+  closeM('mu');renderG();stG();
+  toast(`${n} nova(s), ${u} atualizada(s)`,'ok');
 }
 
 /* ============================================================
