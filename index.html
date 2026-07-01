@@ -176,7 +176,8 @@ textarea{resize:vertical;min-height:84px;line-height:1.5;font-family:inherit}
 .uz:hover,.uz.over{border-color:var(--blue);background:linear-gradient(180deg,rgba(30,60,130,.35),rgba(20,31,56,.4));transform:translateY(-2px);box-shadow:0 14px 40px rgba(30,60,130,.4)}
 .uz i{font-size:42px;color:var(--blue);margin-bottom:12px;display:block;filter:drop-shadow(0 4px 12px rgba(91,155,255,.5))}
 .uz p{color:var(--tx);margin-bottom:6px;font-weight:600}.uz small{color:var(--tx3);font-size:12px}
-.ctw{background:var(--glass);border:1px solid var(--bd);border-radius:var(--r2);overflow:auto;box-shadow:var(--glow)}
+.ctw{background:#0c1424;border:1px solid var(--bd);border-radius:var(--r2);overflow:auto;box-shadow:var(--glow);max-height:70vh}
+.ctw table th{position:sticky;top:0;background:#101a30;background-image:linear-gradient(180deg,#1a2a49,#101a30);z-index:20;box-shadow:0 4px 14px rgba(4,10,25,.55)}
 .ctw table td,.ctw table th{white-space:nowrap}
 .mok td:first-child{border-left:3px solid var(--green)}.mno td:first-child{border-left:3px solid transparent}
 .chk{width:17px;height:17px;accent-color:var(--blue);cursor:pointer}
@@ -273,7 +274,8 @@ textarea{resize:vertical;min-height:84px;line-height:1.5;font-family:inherit}
       <button class="btn sm" onclick="undoConf()"><i class="ti ti-arrow-back-up"></i>Desfazer</button>
     </div>
     <div class="fbar">
-      <button class="btn suc" onclick="confirmarSel()"><i class="ti ti-check"></i>Confirmar Selecionadas como Pagas</button>
+      <button class="btn pri" onclick="baixaAutomatica()"><i class="ti ti-bolt"></i>Baixa Automática (todos Match + Pago)</button>
+      <button class="btn suc" onclick="confirmarSel()"><i class="ti ti-check"></i>Confirmar Selecionadas</button>
       <span style="color:var(--tx3);font-size:12px" id="selct"></span>
     </div>
     <div class="ctw"><table>
@@ -784,15 +786,21 @@ function R$(v){return 'R$ '+(parseFloat(v)||0).toFixed(2).replace('.',',').repla
 function fmtD(iso){if(!iso)return'—';const[y,m,d]=iso.split('-');return`${d}/${m}/${y}`;}
 
 function stG(){
-  const g=db.guias,tot=g.reduce((a,x)=>a+(parseFloat(x.valor)||0),0),
-    pv=db.pagas.reduce((a,x)=>a+(parseFloat(x.valor)||0),0),
-    canc=g.filter(x=>x.situacao&&x.situacao.includes('Cancelada')).length,
-    semEx=g.filter(x=>!x.procs||!x.procs.length).length;
+  const g=db.guias;
+  // Valor das guias EM ABERTO (ainda não pagas) = o que falta pagar
+  const aPagar = g.reduce((a,x)=>a+(parseFloat(x.valor)||0),0);
+  // Valor já PAGO (guias baixadas)
+  const pago = db.pagas.reduce((a,x)=>a+(parseFloat(x.valor)||0),0);
+  // Total DEVIDO = tudo (em aberto + já pago). Quando uma guia é baixada
+  // ela sai de db.guias e entra em db.pagas, então somamos os dois para
+  // manter o total estável.
+  const totalDevido = aPagar + pago;
+  const semEx = g.filter(x=>!x.procs||!x.procs.length).length;
   document.getElementById('st-guias').innerHTML=`
-    <div class="scard"><i class="ti ti-files ico"></i><div class="lbl">Total Guias</div><div class="val blue">${g.length}</div></div>
-    <div class="scard"><i class="ti ti-cash ico"></i><div class="lbl">Valor Total</div><div class="val">${R$(tot)}</div></div>
-    <div class="scard"><i class="ti ti-clock-dollar ico"></i><div class="lbl">A Pagar</div><div class="val amber">${R$(tot-pv)}</div></div>
-    <div class="scard"><i class="ti ti-circle-check ico"></i><div class="lbl">Pagas</div><div class="val green">${R$(pv)}</div></div>
+    <div class="scard"><i class="ti ti-files ico"></i><div class="lbl">Total Guias</div><div class="val blue">${g.length+db.pagas.length}</div></div>
+    <div class="scard"><i class="ti ti-cash ico"></i><div class="lbl">Total Devido</div><div class="val">${R$(totalDevido)}</div></div>
+    <div class="scard"><i class="ti ti-clock-dollar ico"></i><div class="lbl">A Pagar</div><div class="val amber">${R$(aPagar)}</div></div>
+    <div class="scard"><i class="ti ti-circle-check ico"></i><div class="lbl">Pago</div><div class="val green">${R$(pago)}</div></div>
     <div class="scard"><i class="ti ti-alert-triangle ico"></i><div class="lbl">Sem Exame</div><div class="val ${semEx?'red':'green'}">${semEx}</div></div>`;
   const sel=document.getElementById('frem'),cur=sel.value,rems=[...new Set(db.guias.map(g=>g.remessa).filter(Boolean))].sort();
   sel.innerHTML='<option value="">Todas remessas</option>'+rems.map(r=>`<option${r===cur?' selected':''}>${r}</option>`).join('');
@@ -1108,6 +1116,18 @@ function updSel(){
   const val=selPago.reduce((a,r)=>a+(parseFloat(r.match.valor)||0),0);
   document.getElementById('selct').textContent=
     totalSel>0?`${totalSel} selecionada(s) — ${selPago.length} com Match+Pago — ${R$(val)}`:'';
+}
+// Baixa automática: seleciona e confirma TODAS as linhas que têm
+// Match no BD E situação "Pago", sem o usuário precisar marcar manual.
+function baixaAutomatica(){
+  const elegiveis=crows.filter(r=>r.match&&isPagoStatus(r.sitProc)&&!db.pagas.find(p=>p.num===r.numGuia));
+  if(!elegiveis.length){toast('Nenhuma linha Match + Pago para baixar','er');return;}
+  const total=elegiveis.reduce((a,r)=>a+(parseFloat(r.match.valor)||0),0);
+  if(!confirm(`Dar baixa automática em ${elegiveis.length} guia(s) Match + Pago?\nTotal: ${R$(total)}`))return;
+  // marca só as elegíveis e confirma
+  crows.forEach(r=>r.selected=false);
+  elegiveis.forEach(r=>r.selected=true);
+  confirmarSel();
 }
 function confirmarSel(){
   const sel=crows.filter(r=>r.selected);
